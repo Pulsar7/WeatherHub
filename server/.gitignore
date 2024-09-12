@@ -5,6 +5,7 @@
 *.crt
 *.csr
 *.env
-logs/*
-src/__pycache__/
+*.log
+*.db
+*__pycache__*
 

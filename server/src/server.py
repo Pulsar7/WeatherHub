@@ -9,7 +9,7 @@ import ipaddress
 #
 from .constants import *
 from .client import Client
-
+from .database.utils import create_user, authenticate_user
 
 
 class Server:
@@ -26,6 +26,7 @@ class Server:
         self._server_ssl_keyfilepassword:str = config['server_ssl_keyfilepassword']
         self._max_msg_chunk_size:int|None = None
         self._socket_buffer_size:int|None = None
+        self._responsecode_separator:str|None = None
         self._clients:list[Client] = []
 
         #
@@ -35,6 +36,7 @@ class Server:
         self.server_ssl_keyfilepath = config['server_ssl_keyfilepath']
         self.max_msg_chunk_size = config['max_msg_chunk_size']
         self.socket_buffer_size = config['socket_buffer_size']
+        self.responsecode_separator = config['responsecode_separator']
         #
         self.server_socket:socket.socket|None = None
         self.server_ssl_context:ssl.SSLContext|None = None
@@ -202,7 +204,25 @@ class Server:
         # Update the socket-buffer-size.
         self._socket_buffer_size = buffer_size
 
+    @property
+    def responsecode_separator(self) -> str:
+        """Returns the seperator of the response-code and the actual message."""
+        return self._responsecode_separator
 
+    @responsecode_separator.setter
+    def responsecode_separator(self, separator:str) -> None:
+        """Sets the separator of the response-code and the actual message."""
+
+        if not isinstance(separator, str):
+            raise TypeError("The response-code separator has to be a string.")
+
+        if len(separator) == 0:
+            raise ValueError("The response-code separator can't be empty.")
+
+        if self.responsecode_separator:
+            raise CannotChangeWriteOnceValuesException()
+
+        self._responsecode_separator = separator
 
     def setup_socket(self) -> bool:
         """Setup the server TCP-socket and SSL/TLS-socket for encrypted communication with the clients."""
@@ -273,13 +293,19 @@ class Server:
         except socket.error as _e:
             logging.error(f"<Socket-Error> {_e}")
 
-    def send_msg(self, client:Client, msg:str) -> bool:
+    def send_msg(self, client:Client, msg:str, response_code:ResponseCode=ResponseCode.NO_ERROR) -> bool:
         """Send message to specific client via the encrypted SSL/TLS-Socket."""
 
         if not client.connection_status:
             # Cannot send messages to a closed connection.
             logging.error(f"{client.repr_str} Cannot send a message to a closed connection.")
             return False
+
+        if not isinstance(response_code, ResponseCode):
+            logging.error(f"{client.repr_str} The response-code '{resp_code}' is invalid. Cannot send message to client.")
+            return False
+
+        msg = response_code.value.resp_code+self.responsecode_separator+msg
 
         if len(msg) == 0:
             logging.warning(f"{client.repr_str} Attempted to send an empty message to the client.")
@@ -322,7 +348,7 @@ class Server:
 
         return False
 
-    def recv_msg(self, client:Client) -> tuple[bool, str|None]:
+    def recv_msg(self, client:Client) -> tuple[bool, tuple[str, ResponseCode]|None]:
         """Receive a message from a specific client via the encrypted SSL/TLS-Socket."""
 
         if not client.connection_status:
@@ -342,9 +368,11 @@ class Server:
                 buffered_resp += current_resp
 
                 while MessageFlag.END_BUFFERING.value not in current_resp:
-                    status, current_resp = self.recv_msg(client)
+                    status, resp = self.recv_msg(client)
                     if not status:
                         raise BufferingError("Something went wrong while trying to receive a buffered message from the client")
+
+                    current_resp = resp[0] # response-msg
 
                     if MessageFlag.END_BUFFERING.value in current_resp:
                         buffered_resp += current_resp.split(MessageFlag.END_BUFFERING.value)[1]
@@ -355,7 +383,21 @@ class Server:
                 response = buffered_resp
 
             logging.debug(f"{client.repr_str} Received END_BUFFERING-Flag from client.")
-            return (True, response)
+            # Split response from response_code.
+            if self.responsecode_separator in response:
+                args:list[str] = response.split(self.responsecode_separator)
+                response_msg = args[0]
+                response_code = get_response_code_by_int(args[1])
+                if not response_code:
+                    # Client sent an invalid response-code.
+                    # Assuming no error.
+                    response_code = ResponseCode.NO_ERROR
+            else:
+                # Client sent no response-code.
+                # Assuming no error.
+                response_code = ResponseCode.NO_ERROR
+
+            return (True, (response_msg, response_code))
 
         except BufferingError as _e:
             logging.error(f"{client.repr_str} A buffering-error occured while receiving a message from the client: {_e}")
@@ -376,15 +418,18 @@ class Server:
             logging.error(f"{client.repr_str} Cannot authenticate client with a closed connection.")
             return
 
-        # Waiting for credentials
-        (status, response) = self.recv_msg(client)
+        # Waiting for credentials.
+        (status, resp) = self.recv_msg(client)
         if not status:
             raise ClientAuthenticationFailedException("Couldn't receive credentials.")
+
+        response:str = resp[0] # response-msg
 
         logging.debug(f"{client.repr_str} Received credentials from client.")
 
         # Check if request is valid.
         if not check_if_specific_valid_core_command(response, CoreCommand.AUTHENTICATION_REQUEST):
+            self.send_msg(client, "", ResponseCode.INVALID_ARGUMENTS_ERROR)
             raise ClientAuthenticationFailedException("Response from client is not a valid authentication-request.")
 
         logging.debug(f"{client.repr_str} Received credentials-request is valid.")
@@ -397,36 +442,108 @@ class Server:
         logging.debug(f"{client.repr_str} Parsed received credentials 'username' & 'password'")
 
         # Validate credentials in database and get `client-type` and `client-permission` if credentials are correct.
+        if not authenticate_user(username, password):
+            logging.error("{client.repr_str} Given credentials are wrong.")
+            self.send_msg(client, "", ResponseCode.INVALID_CREDENTIALS_ERROR)
+            raise ClientAuthenticationFailedException()
 
+        client.username = username
 
     def handle_client(self, client:Client) -> None:
         """Handle every incoming client connection inside a separate thread."""
 
         try:
             self.client_authentication(client)
+            user_data = get_user_by_username(client.username)
+
+            if not user_data:
+                logging.critical(f"{client.repr_str} Something went wrong. Client is authenticated, but database couldn't get user-data.")
+                self.send_msg(client, "", ResponseCode.DATABASE_ERROR) # Send client a database-error-response
+                raise ClientAuthenticationFailedException()
+
+            client.client_type = user_data.client_type
+            client.permission = user_data.client_permission
+            client.authentication_status = True
+
             logging.info(f"{client.repr_str} Client has been authenticated successfully.")
         except ClientAuthenticationFailedException as _e:
             # Authentication-status of client is still False.
             logging.error(f"{client.repr_str} Client authentication failed. Closing connection to client.")
 
+        error_counter:int = 0
+
         while client.connection_status and client.authentication_status:
             try:
-                pass
+                if error_counter >= 3:
+                    raise Exception("Error counter exceeded 3.")
+
+                status, client_resp = self.recv_msg(client)
+                if not status:
+                    error_counter += 1
+                    logging.error(f"{client.repr_str} Couldn't get response from client.")
+                    continue
+
+                client_msg:str = client_resp[0] # response-msg
+                response:str = ""
+                response_code:ResponseCode = ResponseCode.NO_ERROR
+
+                # Check if command is a valid command.
+                if check_if_valid_command(client_msg):
+                    logging.warning("{client.repr_str} Response-string from client is not a valid command.")
+                    response_code = ResponseCode.UNKNOWN_COMMAND_ERROR
+
+                    if check_if_specific_valid_core_command(client_msg, CoreCommand.CLOSE_CONNECTION):
+                        # Client wants to close connection.
+                        logging.info(f"{client.repr_str} Received close-connection-command from client.")
+                        break
+
+                    if client.client_type == ClientType.WEATHER_STATION:
+                        # Client is a weather-station.
+                        (response, response_code) = handle_weather_station_command(client, client_msg)
+                        
+
+                if not self.send_msg(client, msg=response, response_code=response_code):
+                    error_counter += 1
+
             except Exception as _error:
                 logging.error(f"{client.repr_str} An unexpected exception occured while handling client: {_error}")
                 break
+
         self.close_connection_to_client(client)
         self._clients.remove(client)
         logging.info(f"{client.repr_str} Closed connection to client.")
 
+    def handle_weather_station_command(self, client:Client, client_msg:str) -> tuple[str, ResponseCode]:
+        """Handle weather station commands."""
+
+        response:str = ""
+        response_code:ResponseCode = ResponseCode.NO_ERROR
+
+        if check_if_specific_valid_client_command(client_msg, CoreCommand.SEND_WEATHER_REPORT):
+            # Weather-station wants to send weather-data.
+            if client.permission >= ClientCommand.SEND_WEATHER_REPORT.value.client_permission:
+                # Client has sufficient permissions.
+                # Get metadata.
+                command_params:tuple = ClientCommand.SEND_WEATHER_REPORT.value.params
+                metadata_location:str = client_msg.split(command_params[0][0])[1].split(command_params[0][1])[0]
+                metadata_timestamp:str = client_msg.split(command_params[1][0])[1].split(command_params[1][1])[0]
+                
+            else:
+                response_code = ResponseCode.NOT_ALLOWED_COMMAND_ERROR
+        else:
+            response_code = ResponseCode.NOT_ALLOWED_COMMAND_ERROR
+
+        return (response, response_code)
+
     def close_connection_to_client(self, client:Client) -> None:
         """Close the connection to a single client."""
+
         if not client.connection_status:
             # Connection is already closed.
             logging.warning(f"{client.repr_str} Cannot close connection to a connection which is already closed.")
             return
 
-        if not self.send_msg(client, msg=str(ResponseCode.NO_ERROR.value.resp_code)+CoreCommand.CLOSE_CONNECTION.value.command_str):
+        if not self.send_msg(client, msg=CoreCommand.CLOSE_CONNECTION.value.command_str):
             # Couldn't send msg to client. Connection could be already closed to client.
             logging.error(f"{client.repr_str} Couldn't send CLOSE_CONNECTION-command to client. Connection could be closed already.")
 
@@ -453,3 +570,4 @@ class Server:
         # Clear whole clients-list.
         self._clients.clear()
         logging.debug("Cleared whole clients-list.")
+
