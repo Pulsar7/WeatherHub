@@ -4,5 +4,7 @@
 *.pem
 *.crt
 *.csr
+*.env
 logs/*
 src/__pycache__/
+
