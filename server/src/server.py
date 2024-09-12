@@ -461,9 +461,9 @@ class Server:
                 self.send_msg(client, "", ResponseCode.DATABASE_ERROR) # Send client a database-error-response
                 raise ClientAuthenticationFailedException()
 
-            client.client_type = user_data.client_type
-            client.permission = user_data.client_permission
             client.authentication_status = True
+            client.client_type = user_data.client_type # Change from UNKNOWN to its real client-type.
+            client.permission = user_data.client_permission # Change from UNKNOWN to its real permission-type.
 
             logging.info(f"{client.repr_str} Client has been authenticated successfully.")
         except ClientAuthenticationFailedException as _e:

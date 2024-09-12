@@ -48,6 +48,11 @@ class Client:
         if not self.authentication_status:
             # Cannot change client-type, when client isn't authenticated.
             raise NotAuthenticatedException()
+
+        if self.client_type != ClientType.UNKNOWN:
+            # Client-Type can be only set once.
+            raise CannotChangeWriteOnceValuesException()
+
         self._client_type = new_client_type
 
     @property
@@ -60,6 +65,10 @@ class Client:
         if not self.authentication_status:
             # Cannot change client-permission, when client isn't authenticated.
             raise NotAuthenticatedException()
+        if self.permission == ClientPermission.UNKNOWN:
+            # Permission can be only set once.
+            raise CannotChangeWriteOnceValuesException()
+
         self._client_permission = new_client_permission
 
     @property
