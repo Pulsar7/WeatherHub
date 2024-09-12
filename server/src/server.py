@@ -241,14 +241,8 @@ class Server:
             self.server_ssl_context:ssl.SSLContext = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
             self.server_ssl_context.load_cert_chain(certfile=self.server_ssl_certfilepath, keyfile=self.server_ssl_keyfilepath, password=self.server_ssl_keyfilepassword)
             return True
-        except socket.error as _e:
+        except (socket.error, IOError, ssl.SSLError) as _e:
             logging.error(f"Couldn't setup server-socket: {_e}")
-            return False
-        except IOError as _e:
-            logging.error(f"Couldn't operate with certfie/keyfile: {_e}")
-            return False
-        except ssl.SSLError as _e:
-            logging.error(f"Couldn't setup SSL/TLS server-socket: {_e}")
             return False
 
     def run(self) -> None:
@@ -264,16 +258,22 @@ class Server:
 
                 logging.info(f"New incoming connection {client_addr}")
 
-                # Wrap the client socket with SSL/TLS
-                secure_client_socket:ssl.SSLSocket = self.server_ssl_context.wrap_socket(client_socket, server_side=True)
+                try:
+                    # Wrap the client socket with SSL/TLS
+                    secure_client_socket:ssl.SSLSocket = self.server_ssl_context.wrap_socket(client_socket, server_side=True)
 
-                # Create client-object and start a new thread.
-                client:Client = Client(client_socket=client_socket, ssl_socket=secure_client_socket, client_addr=client_addr)
-                client_thread = threading.Thread(target=self.handle_client, args=(client,), daemon=False)
-                client_thread.start()
+                    # Create client-object and start a new thread.
+                    client:Client = Client(client_socket=client_socket, ssl_socket=secure_client_socket, client_addr=client_addr)
+                    client_thread = threading.Thread(target=self.handle_client, args=(client,), daemon=True)
+                    # Client thread is a daemon-thread to ensure, that when the main-process exits, the thread will automatically be killed.
+                    client_thread.start()
 
-                self._clients.append(client)
-
+                    self._clients.append(client)
+                except ssl.SSLError as _e:
+                    logging.error(f"{client_addr}> SSL-Handshake with client failed: {_e}")
+                    client_socket.close()
+                    logging.warning(f"{client_addr}> Closed connection to client.")
+                    continue
             except socket.error as _e:
                 logging.critical(f"A socket-error occured: {_e}")
                 break
