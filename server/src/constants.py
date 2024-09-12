@@ -40,6 +40,7 @@ Command = namedtuple('Command', ['client_permission', 'command_str', 'params'])
 
 class CoreCommand(Enum):
     CLOSE_CONNECTION = Command(ClientPermission.NORMAL, "!#CloseConnection#!", ())
+
     AUTHENTICATION_REQUEST = Command(ClientPermission.NORMAL, "!#AuthenticationRequest#!",
                             ( ("<USERNAME>", "</USERNAME>"), ("<PASSWORD>", "</PASSWORD>") ))
 
@@ -47,6 +48,7 @@ class ClientCommand(Enum):
     CREATE_USER = Command(ClientPermission.ROOT, "!#CreateUser#!",
                             ( ("<USERNAME>", "</USERNAME>"), ("<PASSWORD>", "</PASSWORD>"),
                               ("<CLIENTTYPE>","</CLIENTTYPE>"), ("<CLIENTPERMISSION>", "</CLIENTPERMISSION>") ))
+
     SEND_WEATHER_REPORT = Command(ClientPermission.NORMAL, "!#SendWeatherReport#!",
                             ( ("<METADATA_WEATHERSTATIONLOCATION>", "</METADATA_WEATHERSTATION_LOCATION>"),
                               ("<METADATA_TIMESTAMP>", "</METADATA_TIMESTAMP>"), ("<WEATHERDATA>", "</WEATHERDATA>") ))

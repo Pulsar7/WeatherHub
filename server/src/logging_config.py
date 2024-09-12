@@ -1,8 +1,8 @@
 import os
 import time
 import logging
-from logging.handlers import TimedRotatingFileHandler
 from datetime import datetime
+from logging.handlers import TimedRotatingFileHandler
 #
 from .config import LOG_DIRPATH, LOG_FILENAME
 

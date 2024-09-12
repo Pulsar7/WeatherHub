@@ -527,7 +527,7 @@ class Server:
                 command_params:tuple = ClientCommand.SEND_WEATHER_REPORT.value.params
                 metadata_location:str = client_msg.split(command_params[0][0])[1].split(command_params[0][1])[0]
                 metadata_timestamp:str = client_msg.split(command_params[1][0])[1].split(command_params[1][1])[0]
-                
+
             else:
                 response_code = ResponseCode.NOT_ALLOWED_COMMAND_ERROR
         else:
