@@ -1,0 +1,8 @@
+*.swp
+*.key
+*.cert
+*.pem
+*.crt
+*.csr
+logs/*
+src/__pycache__/

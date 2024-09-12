@@ -1,4 +1,5 @@
 from enum import Enum, auto
+from collections import namedtuple
 
 
 class ClientType(Enum):
@@ -41,7 +42,6 @@ class CoreCommand(Enum):
     CLOSE_CONNECTION = Command(ClientPermission.NORMAL, "!#CloseConnection#!", ())
     AUTHENTICATION_REQUEST = Command(ClientPermission.NORMAL, "!#AuthenticationRequest#!",
                             ( ("<USERNAME>", "</USERNAME>"), ("<PASSWORD>", "</PASSWORD>") ))
-
 
 class ClientCommand(Enum):
     pass

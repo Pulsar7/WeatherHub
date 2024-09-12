@@ -3,10 +3,13 @@ import sys
 import ssl
 import time
 import socket
+import logging
 import threading
 import ipaddress
 #
+from .constants import *
 from .client import Client
+
 
 
 class Server:
@@ -23,7 +26,7 @@ class Server:
         self._server_ssl_keyfilepassword:str = config['server_ssl_keyfilepassword']
         self._max_msg_chunk_size:int|None = None
         self._socket_buffer_size:int|None = None
-        self._clients[Client] = []
+        self._clients:list[Client] = []
 
         #
         self.server_addr = config['server_addr']
@@ -206,45 +209,80 @@ class Server:
 
         if self.server_socket:
             # Server-Socket does already exist.
+            logging.warning("Attempted to overwrite current server-socket")
             return False
 
         try:
-            self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM, prot=0) # IPv4-TCP
+            self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM, proto=0) # IPv4-TCP
             self.server_socket.bind(self.server_addr)
             self.server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) # enable address reuse
             self.server_socket.listen(self.max_incoming_connections)
             # Wrap the TCP-Socket with SSL/TLS.
-            self.server_ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+            self.server_ssl_context:ssl.SSLContext = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
             self.server_ssl_context.load_cert_chain(certfile=self.server_ssl_certfilepath, keyfile=self.server_ssl_keyfilepath, password=self.server_ssl_keyfilepassword)
             return True
         except socket.error as _e:
+            logging.error(f"Couldn't setup server-socket: {_e}")
             return False
-
+        except IOError as _e:
+            logging.error(f"Couldn't operate with certfie/keyfile: {_e}")
+            return False
+        except ssl.SSLError as _e:
+            logging.error(f"Couldn't setup SSL/TLS server-socket: {_e}")
+            return False
 
     def run(self) -> None:
         if not self.setup_socket():
+            logging.critical("Couldn't setup server-socket. Cannot start.")
             return
+
+        logging.info(f"Server socket has been created. Server is now listening on {self.server_addr}")
 
         while self._running:
             try:
-                pass
+                (client_socket, client_addr) = self.server_socket.accept()
+
+                logging.info(f"New incoming connection {client_addr}")
+
+                # Wrap the client socket with SSL/TLS
+                secure_client_socket:ssl.SSLSocket = self.server_ssl_context.wrap_socket(client_socket, server_side=True)
+
+                # Create client-object and start a new thread.
+                client:Client = Client(client_socket=client_socket, ssl_socket=secure_client_socket, client_addr=client_addr)
+                client_thread = threading.Thread(target=self.handle_client, args=(client,), daemon=False)
+                client_thread.start()
+
+                self._clients.append(client)
+
             except socket.error as _e:
+                logging.critical(f"A socket-error occured: {_e}")
                 break
+
+            except KeyboardInterrupt as _e:
+                logging.warning("Detected a keyboard-interruption. Closing server.")
+                break
+
             except Exception as _e:
+                logging.critical(f"An unexpected exception occured: {_e}")
                 break
 
         self.close_all_connections()
         # Close server socket
-        self.server_ssl_context.shutdown()
-        self.server_socket.close()
+        try:
+            self.server_socket.close()
+        except socket.error as _e:
+            logging.error(f"<Socket-Error> {_e}")
 
     def send_msg(self, client:Client, msg:str) -> bool:
         """Send message to specific client via the encrypted SSL/TLS-Socket."""
 
         if not client.connection_status:
+            # Cannot send messages to a closed connection.
+            logging.error(f"{client.repr_str} Cannot send a message to a closed connection.")
             return False
 
         if len(msg) == 0:
+            logging.warning(f"{client.repr_str} Attempted to send an empty message to the client.")
             return False
 
         try:
@@ -274,13 +312,13 @@ class Server:
             return True
 
         except BufferingError as _e:
-            pass
+            logging.error(f"{client.repr_str} An error occured while trying to send a buffered message to the client: {_e}")
 
         except socket.error as _e:
-            pass
+            logging.error(f"{client.repr_str} A socket-error occured while trying to send a message to the client: {_e}")
 
         except Exception as _e:
-            pass
+            logging.error(f"{client.repr_str} An unexcepted exception occured while trying to send a message to the client: {_e}")
 
         return False
 
@@ -288,6 +326,8 @@ class Server:
         """Receive a message from a specific client via the encrypted SSL/TLS-Socket."""
 
         if not client.connection_status:
+            # Cannot receive messages from a close connection.
+            logging.error(f"{client.repr_str} Cannot receive a message from a closed connection.")
             return False
 
         try:
@@ -295,6 +335,7 @@ class Server:
             response:str = package.decode()
             # Check if buffering is required
             if MessageFlag.BEGIN_BUFFERING.value in response:
+                logging.debug(f"{client.repr_str} Received BEGIN_BUFFERING-Flag from client.")
                 # Begin buffering
                 buffered_resp:str = ""
                 current_resp:str = response.split(MessageFlag.BEGIN_BUFFERING.value)[1]
@@ -313,13 +354,26 @@ class Server:
 
                 response = buffered_resp
 
+            logging.debug(f"{client.repr_str} Received END_BUFFERING-Flag from client.")
             return (True, response)
+
+        except BufferingError as _e:
+            logging.error(f"{client.repr_str} A buffering-error occured while receiving a message from the client: {_e}")
+
+        except socket.error as _e:
+            logging.error(f"{client.repr_str} A socket-error occured while receiving a message from the client: {_e}")
+
+        except Exception as _e:
+            logging.error(f"{client.repr_str} An unexpected error occured while receiving a message from the client: {_e}")
+
+        return (False,None)
 
     def client_authentication(self, client:Client) -> None:
         """Authenticate client by credentials."""
 
         if not client.connection_status:
             # Unreachable ???
+            logging.error(f"{client.repr_str} Cannot authenticate client with a closed connection.")
             return
 
         # Waiting for credentials
@@ -327,42 +381,54 @@ class Server:
         if not status:
             raise ClientAuthenticationFailedException("Couldn't receive credentials.")
 
+        logging.debug(f"{client.repr_str} Received credentials from client.")
+
         # Check if request is valid.
         if not check_if_specific_valid_core_command(response, CoreCommand.AUTHENTICATION_REQUEST):
             raise ClientAuthenticationFailedException("Response from client is not a valid authentication-request.")
+
+        logging.debug(f"{client.repr_str} Received credentials-request is valid.")
 
         # Parse credentials.
         credentials:str = response.split(CoreCommand.AUTHENTICATION_REQUEST.value.command_str)[1]
         username:str = credentials.split(CoreCommand.AUTHENTICATION_REQUEST.value.params[0][0])[1].split(CoreCommand.AUTHENTICATION_REQUEST.value.params[0][1])[0]
         password:str = credentials.split(CoreCommand.AUTHENTICATION_REQUEST.value.params[1][0])[1].split(CoreCommand.AUTHENTICATION_REQUEST.value.params[1][1])[0]
 
+        logging.debug(f"{client.repr_str} Parsed received credentials 'username' & 'password'")
+
         # Validate credentials in database and get `client-type` and `client-permission` if credentials are correct.
 
 
     def handle_client(self, client:Client) -> None:
         """Handle every incoming client connection inside a separate thread."""
+
         try:
             self.client_authentication(client)
+            logging.info(f"{client.repr_str} Client has been authenticated successfully.")
         except ClientAuthenticationFailedException as _e:
-            pass
+            # Authentication-status of client is still False.
+            logging.error(f"{client.repr_str} Client authentication failed. Closing connection to client.")
 
         while client.connection_status and client.authentication_status:
             try:
                 pass
             except Exception as _error:
+                logging.error(f"{client.repr_str} An unexpected exception occured while handling client: {_error}")
                 break
         self.close_connection_to_client(client)
         self._clients.remove(client)
+        logging.info(f"{client.repr_str} Closed connection to client.")
 
     def close_connection_to_client(self, client:Client) -> None:
         """Close the connection to a single client."""
         if not client.connection_status:
             # Connection is already closed.
+            logging.warning(f"{client.repr_str} Cannot close connection to a connection which is already closed.")
             return
 
         if not self.send_msg(client, msg=str(ResponseCode.NO_ERROR.value.resp_code)+CoreCommand.CLOSE_CONNECTION.value.command_str):
             # Couldn't send msg to client. Connection could be already closed to client.
-            pass
+            logging.error(f"{client.repr_str} Couldn't send CLOSE_CONNECTION-command to client. Connection could be closed already.")
 
         try:
             client.authentication_status = False
@@ -370,15 +436,20 @@ class Server:
             client.ssl_socket.shutdown(socket.SHUT_RDWR) # Shutdown SSL layer
             client.tcp_socket.shutdown(socket.SHUT_RDWR) # Shutdown TCP layer
         except Exception as _e:
-            pass
+            logging.error(f"{client.repr_str} An unexpected exception occured while trying to close connection to the client: {_e}")
         finally:
             client.ssl_socket.close()
             client.tcp_socket.close()
+            logging.debug(f"{client.repr_str} Closed client-sockets.")
 
     def close_all_connections(self) -> None:
         if len(self._clients) == 0:
             # No client connected.
+            logging.info("No client connected. No connection to close.")
             return
+        # Iterate through list of connected clients.
         for client in self._clients:
             self.close_connection_to_client(client)
+        # Clear whole clients-list.
         self._clients.clear()
+        logging.debug("Cleared whole clients-list.")
