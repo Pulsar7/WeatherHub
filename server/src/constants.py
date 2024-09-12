@@ -37,11 +37,42 @@ class MessageFlag(Enum):
 Command = namedtuple('Command', ['client_permission', 'command_str', 'params'])
 
 
-class CoreCommands(Enum):
+class CoreCommand(Enum):
     CLOSE_CONNECTION = Command(ClientPermission.NORMAL, "!#CloseConnection#!", ())
     AUTHENTICATION_REQUEST = Command(ClientPermission.NORMAL, "!#AuthenticationRequest#!",
                             ( ("<USERNAME>", "</USERNAME>"), ("<PASSWORD>", "</PASSWORD>") ))
 
 
-class ClientCommands(Enum):
+class ClientCommand(Enum):
     pass
+
+
+
+
+### FUNCTIONS ###
+
+
+def check_if_specific_valid_core_command(command:str, core_command:CoreCommand) -> bool:
+    """Check if the given string is equals the given core-command-syntax."""
+
+    if len(command) == 0:
+        return False
+
+    if not isinstance(core_command, CoreCommand):
+        raise TypeError("Given core-command has to be from the type CoreCommand.")
+
+    if core_command.value.command_str not in command:
+        return False
+
+    if len(core_command.value.params) == 0 and len(command) > core_command.value.command_str:
+        # If core-command has no paramters, the command has to the equal to the command_str.
+        return False
+
+    if len(core_command.value.params) == 0:
+        return True
+
+    for param in core_command.value.params:
+        if param not in command:
+            return False
+
+    return True
