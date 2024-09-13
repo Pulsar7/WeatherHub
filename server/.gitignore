@@ -5,7 +5,7 @@
 *.crt
 *.csr
 *.env
-*.log
+*.log*
 *.db
 *__pycache__*
 

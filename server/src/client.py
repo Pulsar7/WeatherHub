@@ -58,7 +58,7 @@ class Client:
     @property
     def permission(self) -> ClientPermission:
         """Returns the client permission."""
-        return self._client_permission
+        return self._permission
 
     @permission.setter
     def permission(self, new_client_permission:ClientPermission) -> None:
@@ -69,7 +69,7 @@ class Client:
             # Permission can be only set once.
             raise CannotChangeWriteOnceValuesException()
 
-        self._client_permission = new_client_permission
+        self._permission = new_client_permission
 
     @property
     def connection_status(self) -> bool:
@@ -97,7 +97,7 @@ class Client:
     def authentication_status(self, new_auth_status:bool) -> None:
         """Sets authentication-status of client."""
 
-        if new_auth_staus == self.authentication_status:
+        if new_auth_status == self.authentication_status:
             # Nothing to change.
             raise ValueError("New authentication status equals current.")
         if not self.connection_status and new_auth_status:
@@ -131,4 +131,4 @@ class Client:
 
     @property
     def repr_str(self) -> str:
-        return f"<{client.client_type}/{client.permission}#{client.username}@{client.client_addr[0]}>"
+        return f"<{self.client_type}/{self.permission}#{self.username}@{self.client_addr[0]}>"

@@ -5,10 +5,11 @@ import time
 import socket
 import logging
 import threading
-import ipaddress
 #
+from .utils import *
 from .constants import *
 from .client import Client
+from .custom_exceptions import *
 from .database.utils import create_user, authenticate_user
 
 
@@ -58,46 +59,15 @@ class Server:
             raise TypeError("Server Port has to be an intenger")
 
         # Check if given host is a valid IP-Address or hostname.
-        if not self.check_host(new_server_addr[0]):
+        if not check_host(new_server_addr[0]):
             raise ValueError("Server Hostname/IP-Address is invalid")
 
         # Check if given port is valid.
-        if not self.check_port(new_server_addr[1]):
+        if not check_port(new_server_addr[1]):
             raise ValueError("Server Port is invalid")
 
         # Updates server_address.
         self._server_addr = new_server_addr
-
-    def check_port(self, port:int) -> bool:
-        """Check if given port is a valid port-number."""
-
-        if port <= 0 or port > 65535:
-            return False
-
-        return True
-
-    def check_host(self, host:str) -> bool:
-        """Check if given host is a valid hostname or IP-Address."""
-
-        # Get IP-Address if host is a hostname.
-        try:
-            ip_addr:str = socket.gethostbyname(host)
-        except socket.error as _e:
-            return False
-
-        try:
-            ipv4_addr = ipaddress.IPv4Address(ip_addr)
-            return True
-        except ipaddress.AddressValueError as _e:
-            # Invalid IPv4-Address. Could be a valid IPv6-Address.
-            pass
-
-        try:
-            ipv6_addr = ipaddress.IPv6Address(ip_addr)
-            return True
-        except ipaddress.AddressValueError as _e:
-            # Invalid IPv4- & IPv6-Address
-            return False
 
     @property
     def max_incoming_connections(self) -> int:
@@ -245,6 +215,11 @@ class Server:
             logging.error(f"Couldn't setup server-socket: {_e}")
             return False
 
+    def get_connection_config_string(self) -> str:
+        """Get configuration-string for new incoming connections."""
+
+        return f"<BUFFER_SIZE>{self.socket_buffer_size}</BUFFER_SIZE><MAX_MSG_CHUNK_SIZE>{self.max_msg_chunk_size}</MAX_MSG_CHUNK_SIZE>"
+
     def run(self) -> None:
         if not self.setup_socket():
             logging.critical("Couldn't setup server-socket. Cannot start.")
@@ -305,7 +280,9 @@ class Server:
             logging.error(f"{client.repr_str} The response-code '{resp_code}' is invalid. Cannot send message to client.")
             return False
 
-        msg = response_code.value.resp_code+self.responsecode_separator+msg
+        msg = str(response_code.value.resp_code)+self.responsecode_separator+msg
+
+        logging.debug(f"{client.repr_str} Message to send: {msg}")
 
         if len(msg) == 0:
             logging.warning(f"{client.repr_str} Attempted to send an empty message to the client.")
@@ -352,7 +329,7 @@ class Server:
         """Receive a message from a specific client via the encrypted SSL/TLS-Socket."""
 
         if not client.connection_status:
-            # Cannot receive messages from a close connection.
+            # Cannot receive messages from a closed connection.
             logging.error(f"{client.repr_str} Cannot receive a message from a closed connection.")
             return False
 
@@ -376,18 +353,19 @@ class Server:
 
                     if MessageFlag.END_BUFFERING.value in current_resp:
                         buffered_resp += current_resp.split(MessageFlag.END_BUFFERING.value)[1]
+                        logging.debug(f"{client.repr_str} Received END_BUFFERING-Flag from client.")
+
                         continue
 
                     buffered_resp += current_resp
 
                 response = buffered_resp
 
-            logging.debug(f"{client.repr_str} Received END_BUFFERING-Flag from client.")
             # Split response from response_code.
             if self.responsecode_separator in response:
                 args:list[str] = response.split(self.responsecode_separator)
-                response_msg = args[0]
-                response_code = get_response_code_by_int(args[1])
+                response_msg = args[1]
+                response_code = get_response_code_by_value(args[0])
                 if not response_code:
                     # Client sent an invalid response-code.
                     # Assuming no error.
@@ -396,6 +374,7 @@ class Server:
                 # Client sent no response-code.
                 # Assuming no error.
                 response_code = ResponseCode.NO_ERROR
+                reponse_msg = response
 
             return (True, (response_msg, response_code))
 
@@ -453,6 +432,10 @@ class Server:
         """Handle every incoming client connection inside a separate thread."""
 
         try:
+            # Sending client the connection-configuration-string.
+            if not self.send_msg(client, msg=self.get_connection_config_string()):
+                raise CannotSendConnectionConfigError()
+            # User-Authentication
             self.client_authentication(client)
             user_data = get_user_by_username(client.username)
 
@@ -466,6 +449,9 @@ class Server:
             client.permission = user_data.client_permission # Change from UNKNOWN to its real permission-type.
 
             logging.info(f"{client.repr_str} Client has been authenticated successfully.")
+        except CannotSendConnectionConfigError as _e:
+            # Connection-configuration failed.
+            logging.error(f"{client.repr_str} {_e}")
         except ClientAuthenticationFailedException as _e:
             # Authentication-status of client is still False.
             logging.error(f"{client.repr_str} Client authentication failed. Closing connection to client.")
@@ -548,16 +534,43 @@ class Server:
             logging.error(f"{client.repr_str} Couldn't send CLOSE_CONNECTION-command to client. Connection could be closed already.")
 
         try:
-            client.authentication_status = False
+            if client.authentication_status:
+                client.authentication_status = False
             client.connection_status = False
-            client.ssl_socket.shutdown(socket.SHUT_RDWR) # Shutdown SSL layer
-            client.tcp_socket.shutdown(socket.SHUT_RDWR) # Shutdown TCP layer
+
+            if client.ssl_socket:
+                try:
+                    client.ssl_socket.shutdown(socket.SHUT_RDWR) # Shutdown SSL layer
+                except (socket.error, OSError) as ssl_e:
+                    logging.warning(f"{client.repr_str} Could not shut down SSL socket: {ssl_e}")
+
+            if client.tcp_socket:
+                try:
+                    client.tcp_socket.shutdown(socket.SHUT_RDWR) # Shutdown TCP layer
+                except (socket.error, OSError) as tcp_e:
+                    logging.warning(f"{client.repr_str} Could not shut down TCP socket: {tcp_e}")
         except Exception as _e:
             logging.error(f"{client.repr_str} An unexpected exception occured while trying to close connection to the client: {_e}")
         finally:
-            client.ssl_socket.close()
-            client.tcp_socket.close()
-            logging.debug(f"{client.repr_str} Closed client-sockets.")
+            # Ensure the SSL socket is closed
+            if client.ssl_socket:
+                try:
+                    client.ssl_socket.close()
+                except (socket.error, OSError) as ssl_close_e:
+                    logging.warning(f"{client.repr_str} Error closing SSL socket: {ssl_close_e}")
+            else:
+                logging.debug(f"{client.repr_str} SSL socket already closed or invalid.")
+
+            # Ensure the TCP socket is closed
+            if client.tcp_socket:
+                try:
+                    client.tcp_socket.close()
+                except (socket.error, OSError) as tcp_close_e:
+                    logging.warning(f"{client.repr_str} Error closing TCP socket: {tcp_close_e}")
+            else:
+                logging.debug(f"{client.repr_str} TCP socket already closed or invalid.")
+
+            logging.debug(f"{client.repr_str} Closed client sockets.")
 
     def close_all_connections(self) -> None:
         if len(self._clients) == 0:

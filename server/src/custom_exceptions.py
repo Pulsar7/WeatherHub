@@ -1,4 +1,10 @@
+class CannotSendConnectionConfigError(Exception):
 
+    """Exception raised when the connection-configuration-string cannot be sent to the client."""
+
+    def __init__(self, message:str="Couldn't send the connection-configuration-string to the client.") -> None:
+        self.message = message
+        super().__init__(self.message)
 
 class InvalidConnectionStatusException(Exception):
 
@@ -49,4 +55,4 @@ class ClientAuthenticationFailedException(Exception):
 
     def __init__(self, message:str="The client authentication-process failed.") -> None:
         self.message = message
-        suepr().__init__(self.message)
+        super().__init__(self.message)
