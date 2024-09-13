@@ -1,12 +1,13 @@
 import os
 import ssl
+import json
 import socket
 #
 from .utils import *
 from .config import *
 from .constants import *
-from .logger import Logger
 from .custom_exceptions import *
+from .logger import Logger, Console
 
 
 class Client:
@@ -26,7 +27,9 @@ class Client:
         self._buffer_size:int|None = None
         self._responsecode_separator:str|None = None
 
+        self._authentication_staus:bool = False
         self._connection_status:bool = False
+        self._client_commands:dict = {}
 
         #
         self.server_address = config['server_addr']
@@ -274,27 +277,76 @@ class Client:
 
         if self.connection_configuration():
             if self.pwd_authentication_process():
-                self.logger.info("Connection successful.")
-                while self._connection_status:
-                    try:
-                        user_input:str = input(f"{self.client_username}@{self.server_address}$> ")
+                if self.get_client_commands():
+                    Console().print(self._client_commands)
+                    while self._connection_status:
+                        try:
+                            user_input:str = input(f"{self.client_username}@{self.server_address[0]}:{self.server_address[1]}$> ")
 
-                    except KeyboardInterrupt as _e:
-                        self.logger.warning("Detected keyboard-interruption")
-                        break
-                    except Exception as _e:
-                        self.logger.error(f"An unexpected error occured: {_e}")
-                        break
+                        except KeyboardInterrupt as _e:
+                            print("\n")
+                            self.logger.warning("Detected keyboard-interruption")
+                            break
+                        except Exception as _e:
+                            self.logger.error(f"An unexpected error occured: {_e}")
+                            break
+                else:
+                    self.logger.error("Couldn't get Client-Commands.")
             else:
                 self.logger.error("Cannot proceed without being authenticated.")
         else:
             self.logger.error("Connection configuration failed. Cannot proceed.")
+
+        if self.send_msg(CoreCommand.CLOSE_CONNECTION.value.command_str):
+            # Connection is still up and running
+            # Graceful stop.
+            (status, response) = self.recv_msg()
+            if status:
+                if response[0] == CoreCommand.CLOSE_CONNECTION.value.command_str:
+                    self.logger.info("Received a CLOSE-CONNECTION-response from the server.")
 
         if self.client_tcp_socket:
             self.client_tcp_socket.close()
 
         if self.client_ssl_socket:
             self.client_ssl_socket.close()
+
+    def get_client_commands(self) -> bool:
+        """Get Client-Commannds from server."""
+
+        if not self._connection_status:
+            self.logger.error("Something went wrong. Cannot ask for client-commands via a closed connection.")
+            return False
+
+        if not self._authentication_status:
+            self.logger.error("Something went wrong. Cannot ask for client-commands, when client isn't authenticated.")
+            return False
+
+        # Send request
+        if not self.send_msg(msg=ClientCommand.GET_CLIENT_COMMANDS.value.command_str):
+            self.logger.error("Couldn't ask for client-commands at server.")
+            return False
+
+        # Wait for response
+        (status, response) = self.recv_msg()
+        if not status:
+            self.logger.error("Couldn't receive client-commands from server.")
+            return False
+
+        if response[1] != ResponseCode.NO_ERROR:
+            self.logger.error(f"Couldn't receive client-commands from server due to ResponseCode-Error: {response[1]}")
+            return False
+
+        # Get help-dicitionary.
+        try:
+            help_string:str = response[0]
+            help_dict:dict = json.loads(help_string)
+            self._client_commands = help_dict
+            return True
+        except Exception as _e:
+            self.logger.error(f"An unexpected error occured while trying to get help-dictionary: {_e}")
+            return False
+
 
     def connection_configuration(self) -> bool:
         """Receive connection-configuration string and update buffer_size + max_chunk_size."""
@@ -350,6 +402,7 @@ class Client:
 
         if response[1] == ResponseCode.AUTHENTICATION_SUCCESSFUL:
             self.logger.info("Received an AUTHENTICATION-SUCCESSFUL-response from the server.")
+            self._authentication_status = True
             return True
 
         self.logger.error(f"Received an ResponseCode-Error from the server: {response[1]}")

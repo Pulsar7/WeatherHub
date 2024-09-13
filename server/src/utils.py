@@ -67,7 +67,7 @@ def check_if_specific_valid_client_command(command:str, client_command:ClientCom
         return False
 
     if len(client_command.value.params) == 0:
-        if len(command) > len(client.command.value.command_str):
+        if len(command) > len(client_command.value.command_str):
             # If client-command has no paramters, the command has to be equal to the command_str.
             return False
 

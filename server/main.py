@@ -12,8 +12,10 @@ import logging
 import argparse
 #
 from src.config import *
+from src.constants import *
 from src.server import Server
 from src.database.models import User
+from src.database.utils import create_user
 from src.logging_config import setup_logging
 from src.database.database_manager import initialize_database
 
@@ -21,6 +23,7 @@ from src.database.database_manager import initialize_database
 def main() -> None:
     initialize_database()
     setup_logging(cli_output=args.cli_logger)
+    print(create_user(username="admin", password="lol1234", client_type=ClientType.ADMIN_CLIENT, client_permission=ClientPermission.ROOT))
     start:float = time.time()
     logging.info(f"Started at {start}")
     server:Server = Server(config=server_config)

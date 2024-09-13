@@ -29,7 +29,7 @@ def authenticate_user(username:str, password:str) -> bool:
 def create_user(username:str, password:str, client_type:ClientType, client_permission:ClientPermission) -> User|None:
     """Create a new user and add to the database."""
 
-    if not get_user_by_username(username):
+    if get_user_by_username(username):
         return None
 
     new_user = User(username=username, password=hash_password(password), client_type=client_type, client_permission=client_permission)

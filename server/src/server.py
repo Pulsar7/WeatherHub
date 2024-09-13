@@ -1,16 +1,18 @@
 import os
 import sys
 import ssl
+import json
 import time
 import socket
 import logging
 import threading
+import traceback
 #
 from .utils import *
 from .constants import *
 from .client import Client
 from .custom_exceptions import *
-from .database.utils import create_user, authenticate_user
+from .database.utils import create_user, authenticate_user, get_user_by_username
 
 
 class Server:
@@ -282,7 +284,7 @@ class Server:
 
         msg = str(response_code.value.resp_code)+self.responsecode_separator+msg
 
-        logging.debug(f"{client.repr_str} Message to send: {msg}")
+        #logging.debug(f"{client.repr_str} Message to send: {msg}")
 
         if len(msg) == 0:
             logging.warning(f"{client.repr_str} Attempted to send an empty message to the client.")
@@ -361,6 +363,7 @@ class Server:
 
                 response = buffered_resp
 
+            response_msg:str = "EMPTY"
             # Split response from response_code.
             if self.responsecode_separator in response:
                 args:list[str] = response.split(self.responsecode_separator)
@@ -426,6 +429,7 @@ class Server:
             self.send_msg(client, "", ResponseCode.INVALID_CREDENTIALS_ERROR)
             raise ClientAuthenticationFailedException()
 
+        client.authentication_status = True
         client.username = username
 
     def handle_client(self, client:Client) -> None:
@@ -435,6 +439,9 @@ class Server:
             # Sending client the connection-configuration-string.
             if not self.send_msg(client, msg=self.get_connection_config_string()):
                 raise CannotSendConnectionConfigError()
+
+            logging.debug(f"{client.repr_str} Sent client the client the connection-configurations")
+
             # User-Authentication
             self.client_authentication(client)
             user_data = get_user_by_username(client.username)
@@ -444,14 +451,19 @@ class Server:
                 self.send_msg(client, "", ResponseCode.DATABASE_ERROR) # Send client a database-error-response
                 raise ClientAuthenticationFailedException()
 
-            client.authentication_status = True
             client.client_type = user_data.client_type # Change from UNKNOWN to its real client-type.
             client.permission = user_data.client_permission # Change from UNKNOWN to its real permission-type.
 
+            # Sending client the successful-authentication-response.
+            if not self.send_msg(client, "", ResponseCode.AUTHENTICATION_SUCCESSFUL):
+                raise ClientAuthenticationFailedException()
+
             logging.info(f"{client.repr_str} Client has been authenticated successfully.")
+
         except CannotSendConnectionConfigError as _e:
             # Connection-configuration failed.
             logging.error(f"{client.repr_str} {_e}")
+
         except ClientAuthenticationFailedException as _e:
             # Authentication-status of client is still False.
             logging.error(f"{client.repr_str} Client authentication failed. Closing connection to client.")
@@ -474,52 +486,106 @@ class Server:
                 response_code:ResponseCode = ResponseCode.NO_ERROR
 
                 # Check if command is a valid command.
-                if check_if_valid_command(client_msg):
-                    logging.warning("{client.repr_str} Response-string from client is not a valid command.")
-                    response_code = ResponseCode.UNKNOWN_COMMAND_ERROR
-
-                    if check_if_specific_valid_core_command(client_msg, CoreCommand.CLOSE_CONNECTION):
-                        # Client wants to close connection.
-                        logging.info(f"{client.repr_str} Received close-connection-command from client.")
+                if check_if_valid_command(command=client_msg):
+                    # Command from client is a valid command.
+                    (response, response_code) = self.handle_client_valid_command(client, client_msg)
+                    if not response and response_code == ResponseCode.NO_ERROR:
+                        # Close connection.
                         break
-
-                    if client.client_type == ClientType.WEATHER_STATION:
-                        # Client is a weather-station.
-                        (response, response_code) = handle_weather_station_command(client, client_msg)
-                        
+                    elif not response:
+                        # Set to empty string.
+                        response = ""
+                else:
+                    # Unknown command.
+                    response_code = ResponseCode.UNKNOWN_COMMAND_ERROR
 
                 if not self.send_msg(client, msg=response, response_code=response_code):
                     error_counter += 1
 
             except Exception as _error:
                 logging.error(f"{client.repr_str} An unexpected exception occured while handling client: {_error}")
+                logging.error(f"Traceback: {traceback.format_exc()}")  # Log the full traceback
                 break
 
         self.close_connection_to_client(client)
         self._clients.remove(client)
         logging.info(f"{client.repr_str} Closed connection to client.")
 
-    def handle_weather_station_command(self, client:Client, client_msg:str) -> tuple[str, ResponseCode]:
-        """Handle weather station commands."""
+    def handle_client_valid_command(self, client:Client, client_msg:str) -> tuple[str|None, ResponseCode]:
+        """Handle all possible client-commands."""
 
-        response:str = ""
-        response_code:ResponseCode = ResponseCode.NO_ERROR
+        # Check all CoreCommands.
 
-        if check_if_specific_valid_client_command(client_msg, CoreCommand.SEND_WEATHER_REPORT):
-            # Weather-station wants to send weather-data.
-            if client.permission >= ClientCommand.SEND_WEATHER_REPORT.value.client_permission:
-                # Client has sufficient permissions.
-                # Get metadata.
-                command_params:tuple = ClientCommand.SEND_WEATHER_REPORT.value.params
-                metadata_location:str = client_msg.split(command_params[0][0])[1].split(command_params[0][1])[0]
-                metadata_timestamp:str = client_msg.split(command_params[1][0])[1].split(command_params[1][1])[0]
+        if check_if_specific_valid_core_command(client_msg, CoreCommand.CLOSE_CONNECTION):
+            # Client wants to close the connection
+            return (None, ResponseCode.NO_ERROR)
 
-            else:
-                response_code = ResponseCode.NOT_ALLOWED_COMMAND_ERROR
-        else:
-            response_code = ResponseCode.NOT_ALLOWED_COMMAND_ERROR
 
-        return (response, response_code)
+        # Check all ClientCommands.
+
+        if check_if_specific_valid_client_command(client_msg, ClientCommand.CREATE_USER):
+            # Client wants to create an user.
+            return self.handle_create_user_command(client, client_msg)
+
+        if check_if_specific_valid_client_command(client_msg, ClientCommand.GET_CLIENT_COMMANDS):
+            # Client wants to get the ClientCommands-list.
+            return self.handle_get_client_commands_command(client)
+
+
+    def handle_get_client_commands_command(self, client:Client) -> tuple[str|None, ResponseCode]:
+        """Handle get-client-commands command from client by sending the Enum-content."""
+
+        command:ClientCommand = ClientCommand.GET_CLIENT_COMMANDS
+
+        # Check if client is allowed to execute this command.
+        if client.permission.value < command.value.client_permission.value:
+            # Client doesn't have sufficient permissions.
+            return (None, ResponseCode.NOT_ALLOWED_COMMAND_ERROR)
+
+        # Get help-string.
+        help_dict:dict = {}
+        for client_command in ClientCommand:
+            if client.permission.value < client_command.value.client_permission.value:
+                # Client is not allowed to execute the command, so it doesn't need it.
+                continue
+            help_dict[client_command.value.command_str] = {'params':client_command.value.params}
+
+        help_string:str = json.dumps(help_dict)
+
+        return (help_string, ResponseCode.NO_ERROR)
+
+
+    def handle_create_user_command(self, client:Client, client_msg:str) -> tuple[str|None, ResponseCode]:
+        """Handle user-creation command from client."""
+
+        command:ClientCommand = ClientCommand.CREATE_USER
+
+        # Check if client is allowed to execute this command.
+        if client.permission.value < command.value.client_permission.value:
+            # Client doesn't have sufficient permissions.
+            return (None, ResponseCode.NOT_ALLOWED_COMMAND_ERROR)
+
+        # Get arguments
+        command_params:str = client_msg.split(command.value.command_str)[1]
+        username:str = command_params.split(command.value.params[0][0])[1].split(command.params[0][1])[0]
+        password:str = command_params.split(command.value.params[1][0])[1].split(command.params[1][1])[0]
+        try:
+            client_type:ClientType = ClientType(int(command_params.split(command.value.params[2][0])[1].split(command.params[2][1])[0]))
+            client_permission:ClientPermission = ClientPermission(int(command_params.split(command.value.params[3][0])[1].split(command.params[3][1])[0]))
+        except ValueError as _e:
+            # Given client-type or/and client_permission is invalid.
+            return ("Given client-type or/and client-permission is invalid.", ResponseCode.INVALID_ARGUMENTS_ERROR)
+
+        # Check username
+        if len(username) == 0:
+            return ("The username can't be empty!", ResponseCode.INVALID_ARGUMENTS_ERROR)
+
+        if not create_user(username=username, password=password, client_type=client_type, client_permission=client_permission):
+            # Couldn't create new user.
+            return ("Choose another username.", ReseponseCode.DATABASE_ERROR)
+
+        return (f"Created new User '{username}'.", ResponseCode.NO_ERROR)
+
 
     def close_connection_to_client(self, client:Client) -> None:
         """Close the connection to a single client."""

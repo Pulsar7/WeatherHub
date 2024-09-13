@@ -32,3 +32,8 @@ class CoreCommand(Enum):
 
     AUTHENTICATION_REQUEST = Command("!#AuthenticationRequest#!",
                             ( ("<USERNAME>", "</USERNAME>"), ("<PASSWORD>", "</PASSWORD>") ))
+
+
+class ClientCommand(Enum):
+    GET_CLIENT_COMMANDS = Command("!#GetClientCommands#!", ())
+

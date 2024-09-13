@@ -65,7 +65,7 @@ class Client:
         if not self.authentication_status:
             # Cannot change client-permission, when client isn't authenticated.
             raise NotAuthenticatedException()
-        if self.permission == ClientPermission.UNKNOWN:
+        if self.permission != ClientPermission.UNKNOWN:
             # Permission can be only set once.
             raise CannotChangeWriteOnceValuesException()
 

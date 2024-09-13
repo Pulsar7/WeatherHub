@@ -3,10 +3,10 @@ from collections import namedtuple
 
 
 class ClientType(Enum):
-    UNKNOWN = auto()
-    ADMIN_CLIENT = auto()
-    WEATHER_STATION = auto()
-    DATA_VIRTUALIZER = auto()
+    UNKNOWN = -1
+    ADMIN_CLIENT = 0
+    WEATHER_STATION = 1
+    DATA_VIRTUALIZER = 2
 
 
 class ClientPermission(Enum):
@@ -53,4 +53,4 @@ class ClientCommand(Enum):
                             ( ("<METADATA_WEATHERSTATIONLOCATION>", "</METADATA_WEATHERSTATION_LOCATION>"),
                               ("<METADATA_TIMESTAMP>", "</METADATA_TIMESTAMP>"), ("<WEATHERDATA>", "</WEATHERDATA>") ))
 
-
+    GET_CLIENT_COMMANDS = Command(ClientPermission.NORMAL, "!#GetClientCommands#!", ())
