@@ -2,9 +2,8 @@
 
 A little project to gather weather-data from several weather-stations, who're connected to a centralized server.
 
-## Server
 
-### Usage
+## Installation
 
 To create a keyfile and the self-signed certificate for the TLS-encryption, you could use `openssl`:
 
@@ -35,4 +34,26 @@ LOG_FILENAME="weatherhub_server.log"
 SERVER_SSL_KEYFILEPASSWORD=""
 DATABASE_URI="sqlite:///instances/database.db"
 RESPONSECODE_SEPARATOR="_#R#_"
+```
+
+And you need also a `admin-client/.env`:
+
+```
+TIMEZONE="UTC"
+SERVER_CERTIFICATE_FILEPATH="ssl_files/certfile_server.crt"
+CLIENT_CERTIFICATE_FILEPATH="ssl_files/certfile_client.crt"
+CLIENT_KEYFILE_PATH="ssl_files/keyfile_client.key"
+CLIENT_KEYFILE_PASSWORD=""
+CLIENT_USERNAME=""
+CLIENT_PASSWORD=""
+DEFAULT_MAX_MSG_CHUNK_SIZE=1024
+DEFAULT_BUFFER_SIZE=1024
+RESPONSECODE_SEPARATOR="_#R#_"
+```
+
+
+Execute server-script manually:
+
+```BASH
+python3 main.py
 ```
