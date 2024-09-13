@@ -12,8 +12,9 @@ To create a keyfile and the self-signed certificate for the TLS-encryption, you 
 # Generate keyfile
 openssl genpkey -algorithm RSA -out keyfile_server.key -aes256
 
-# Generate certificate signing request (CSR)
-openssl req -new -key keyfile_server.key -out server.csr
+# Generate certificate signing request (CSR) - Fill in your data.
+openssl req -new -key keyfile_server.key -out server.csr \
+    -subj "/C=DE/ST=BIELEFELD/L=BIELEFELD/O=BIELEFELD GmbH/CN=localhost"
 
 # Generate self-signed certificate
 openssl x509 -req -days 365 -in server.csr -signkey keyfile_server.key -out certfile_server.crt
