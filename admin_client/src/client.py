@@ -307,6 +307,11 @@ class Client:
                                 continue
                             self.logger.info(f"<SERVER> ({resp_code}) {resp_msg}")
 
+                            if resp_msg == CoreCommand.CLOSE_CONNECTION.value.command_str:
+                                # Server wants to close connection.
+                                self.logger.warning("Server wants to close connection.")
+                                break
+
                         except KeyboardInterrupt as _e:
                             print("\n")
                             self.logger.warning("Detected keyboard-interruption")
@@ -449,8 +454,6 @@ class Client:
 
         if resp_code_msg_part not in msg:
             msg = resp_code_msg_part+self.responsecode_separator+msg
-
-        self.logger.warning(f"MESSAGE TO SEND> {msg} | len = {len(msg)}")
 
         if len(msg) == 0:
             self.logger.warning(f"Attempted to send an empty message to the server.")

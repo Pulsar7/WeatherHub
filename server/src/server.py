@@ -287,8 +287,6 @@ class Server:
         if resp_code_msg_part not in msg:
             msg = resp_code_msg_part+self.responsecode_separator+msg
 
-        logging.debug(f"{client.repr_str} Message to send: {msg}")
-
         if len(msg) == 0:
             logging.warning(f"{client.repr_str} Attempted to send an empty message to the client.")
             return False

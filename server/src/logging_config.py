@@ -42,5 +42,15 @@ def setup_logging(cli_output:bool=False):
     # Ensure logs use UTC time
     logging.Formatter.converter = time.gmtime  # Use UTC for timestamps
 
+    # Suppress SQLAlchemy INFO logs at various levels
+    logging.getLogger('sqlalchemy').setLevel(logging.WARNING)
+    logging.getLogger('sqlalchemy.engine').setLevel(logging.WARNING)
+    logging.getLogger('sqlalchemy.engine.Engine').setLevel(logging.WARNING)
+    logging.getLogger('sqlalchemy.engine.base.Engine').setLevel(logging.WARNING)
+
+    # If further necessary, silence the raw SQL logs
+    logging.getLogger('sqlalchemy.engine.base').setLevel(logging.WARNING)
+    logging.getLogger('sqlalchemy.engine.Engine').setLevel(logging.WARNING)
+
     logging.info("Logging is set up and using ISO 8601 format with UTC time.")
 
