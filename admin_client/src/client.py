@@ -278,10 +278,34 @@ class Client:
         if self.connection_configuration():
             if self.pwd_authentication_process():
                 if self.get_client_commands():
-                    Console().print(self._client_commands)
+                    self.logger.info("Type `help` to see the available client-commands.")
+                    self.logger.info("Press `CTRL+C` or type `close` or `exit` to close the connection.")
                     while self._connection_status:
                         try:
                             user_input:str = input(f"{self.client_username}@{self.server_address[0]}:{self.server_address[1]}$> ")
+                            # Process user-input
+                            user_input = user_input.strip()
+                            if any(close_option in user_input.lower() for close_option in ["close","exit"]):
+                                # User wants to close the connection.
+                                self.logger.info("Closing connection to server.")
+                                break
+
+                            if any(help_option in user_input.lower() for help_option in ["help"]):
+                                # Printout Client commands.
+                                Console().print(self._client_commands)
+                                continue
+
+                            if len(user_input) == 0:
+                                continue
+
+                            if not self.send_msg(user_input):
+                                self.logger.error("Couldn't send user-input to server!")
+
+                            (status, (resp_msg, resp_code)) = self.recv_msg()
+                            if not status:
+                                self.logger.error("Couldn't receive a response from the server!")
+                                continue
+                            self.logger.info(f"<SERVER> ({resp_code}) {resp_msg}")
 
                         except KeyboardInterrupt as _e:
                             print("\n")
@@ -421,7 +445,12 @@ class Client:
             self.logger.error(f"The response-code '{resp_code}' is invalid. Cannot send message to server.")
             return False
 
-        msg = str(response_code.value.resp_code)+self.responsecode_separator+msg
+        resp_code_msg_part:str = str(response_code.value.resp_code)
+
+        if resp_code_msg_part not in msg:
+            msg = resp_code_msg_part+self.responsecode_separator+msg
+
+        self.logger.warning(f"MESSAGE TO SEND> {msg} | len = {len(msg)}")
 
         if len(msg) == 0:
             self.logger.warning(f"Attempted to send an empty message to the server.")
@@ -430,14 +459,16 @@ class Client:
         try:
             if len(msg) > self.max_msg_chunk_size:
                 # Begin buffering
-                total_message_len_with_flags:int = len(MessageFlag.BEGIN_BUFFERING.value + msg + MessageFlag.END_BUFFERING.value)
-
+                # Sending Begin-Buffering-Flag
+                if not self.send_msg(MessageFlag.BEGIN_BUFFERING.value):
+                    raise BufferError("Couldn't send BEGIN-Buffering Message-Flag to server.")
+                # Iterate message.
                 counter:int = 0
                 chunk:str = "X"
 
                 while chunk != "":
                     chunk = msg[counter:self.max_msg_chunk_size+counter]
-                    if not self.send_msg(client, msg=chunk):
+                    if not self.send_msg(msg=chunk):
                         raise BufferingError("Couldn't send buffered message to client")
 
                     counter += self.max_msg_chunk_size
@@ -485,7 +516,7 @@ class Client:
                 buffered_resp += current_resp
 
                 while MessageFlag.END_BUFFERING.value not in current_resp:
-                    status, resp = self.recv_msg(client)
+                    status, resp = self.recv_msg()
                     if not status:
                         raise BufferingError("Something went wrong while trying to receive a buffered message from the server.")
 

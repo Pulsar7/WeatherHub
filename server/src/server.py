@@ -282,9 +282,12 @@ class Server:
             logging.error(f"{client.repr_str} The response-code '{resp_code}' is invalid. Cannot send message to client.")
             return False
 
-        msg = str(response_code.value.resp_code)+self.responsecode_separator+msg
+        resp_code_msg_part:str = str(response_code.value.resp_code)
 
-        #logging.debug(f"{client.repr_str} Message to send: {msg}")
+        if resp_code_msg_part not in msg:
+            msg = resp_code_msg_part+self.responsecode_separator+msg
+
+        logging.debug(f"{client.repr_str} Message to send: {msg}")
 
         if len(msg) == 0:
             logging.warning(f"{client.repr_str} Attempted to send an empty message to the client.")
@@ -293,8 +296,10 @@ class Server:
         try:
             if len(msg) > self.max_msg_chunk_size:
                 # Begin buffering
-                total_message_len_with_flags:int = len(MessageFlag.BEGIN_BUFFERING.value + msg + MessageFlag.END_BUFFERING.value)
-
+                # Sending Begin-Buffering-Flag
+                if not self.send_msg(client, MessageFlag.BEGIN_BUFFERING.value):
+                    raise BufferError("Couldn't send BEGIN-Buffering Message-Flag to client.")
+                # Iterate message.
                 counter:int = 0
                 chunk:str = "X"
 
@@ -356,14 +361,12 @@ class Server:
                     if MessageFlag.END_BUFFERING.value in current_resp:
                         buffered_resp += current_resp.split(MessageFlag.END_BUFFERING.value)[1]
                         logging.debug(f"{client.repr_str} Received END_BUFFERING-Flag from client.")
-
                         continue
 
                     buffered_resp += current_resp
 
                 response = buffered_resp
 
-            response_msg:str = "EMPTY"
             # Split response from response_code.
             if self.responsecode_separator in response:
                 args:list[str] = response.split(self.responsecode_separator)
@@ -377,7 +380,7 @@ class Server:
                 # Client sent no response-code.
                 # Assuming no error.
                 response_code = ResponseCode.NO_ERROR
-                reponse_msg = response
+                response_msg = response
 
             return (True, (response_msg, response_code))
 
@@ -498,6 +501,7 @@ class Server:
                 else:
                     # Unknown command.
                     response_code = ResponseCode.UNKNOWN_COMMAND_ERROR
+                    response = f"The command `{client_msg}` is unknown."
 
                 if not self.send_msg(client, msg=response, response_code=response_code):
                     error_counter += 1
