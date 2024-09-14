@@ -211,6 +211,10 @@ class Server:
             self.server_socket.listen(self.max_incoming_connections)
             # Wrap the TCP-Socket with SSL/TLS.
             self.server_ssl_context:ssl.SSLContext = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+            # Force the context to only use TLSv1.3
+            self.server_ssl_context.minimum_version = ssl.TLSVersion.TLSv1_3
+            #self.server_ssl_context.maximum_version = ssl.TLSVersion.TLSv1_3
+            # Load certificate and keyfile.
             self.server_ssl_context.load_cert_chain(certfile=self.server_ssl_certfilepath, keyfile=self.server_ssl_keyfilepath, password=self.server_ssl_keyfilepassword)
             return True
         except (socket.error, IOError, ssl.SSLError) as _e:
