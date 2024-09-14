@@ -496,6 +496,7 @@ class Server:
                     (response, response_code) = self.handle_client_valid_command(client, client_msg)
                     if not response and response_code == ResponseCode.NO_ERROR:
                         # Close connection.
+                        logging.info(f"{client.repr_str} Client sent a Close-Connection-Request. Closing connection to client.")
                         break
                     elif not response:
                         # Set to empty string.
@@ -506,11 +507,16 @@ class Server:
                     response = f"The command `{client_msg}` is unknown."
 
                 if not self.send_msg(client, msg=response, response_code=response_code):
+                    logging.error(f"{client.repr_str} An error occured while trying to send response to client. (error_counter={error_counter})")
                     error_counter += 1
+
+            except KeyboardInterrupt as _e:
+                    logging.warning(f"{client.repr_str} Detected a keyboard-interruption on server-side. Closing connection to client.")
+                    break
 
             except Exception as _error:
                 logging.error(f"{client.repr_str} An unexpected exception occured while handling client: {_error}")
-                logging.error(f"Traceback: {traceback.format_exc()}")  # Log the full traceback
+                logging.error(f"«TRACEBACK» {traceback.format_exc()}")  # Log the full traceback
                 break
 
         self.close_connection_to_client(client)
@@ -546,6 +552,7 @@ class Server:
         # Check if client is allowed to execute this command.
         if client.permission.value < command.value.client_permission.value:
             # Client doesn't have sufficient permissions.
+            logging.debug(f"{client.repr_str} Client has insufficient permissions to get a list of all available client-commands.")
             return (None, ResponseCode.NOT_ALLOWED_COMMAND_ERROR)
 
         # Get help-string.
@@ -558,17 +565,22 @@ class Server:
 
         help_string:str = json.dumps(help_dict)
 
+        logging.debug(f"{client.repr_str} Got help-string for client ({len(help_string} Bytes)")
+
         return (help_string, ResponseCode.NO_ERROR)
 
 
     def handle_create_user_command(self, client:Client, client_msg:str) -> tuple[str|None, ResponseCode]:
         """Handle user-creation command from client."""
 
+        logging.debug(f"{client.repr_str} Client is trying to create a new user.")
+
         command:ClientCommand = ClientCommand.CREATE_USER
 
         # Check if client is allowed to execute this command.
         if client.permission.value < command.value.client_permission.value:
             # Client doesn't have sufficient permissions.
+            logging.debug(f"{client.repr_str} Client has insufficient permissions to create a new user.")
             return (None, ResponseCode.NOT_ALLOWED_COMMAND_ERROR)
 
         # Get arguments
@@ -589,6 +601,8 @@ class Server:
         if not create_user(username=username, password=password, client_type=client_type, client_permission=client_permission):
             # Couldn't create new user.
             return ("Choose another username.", ReseponseCode.DATABASE_ERROR)
+
+        logging.debug(f"{client.repr_str} Client created a new user with the username '{username}'")
 
         return (f"Created new User '{username}'.", ResponseCode.NO_ERROR)
 
