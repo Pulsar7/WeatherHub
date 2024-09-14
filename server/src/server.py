@@ -543,14 +543,13 @@ class Server:
             # Client wants to get the ClientCommands-list.
             return self.handle_get_client_commands_command(client)
 
-
     def handle_get_client_commands_command(self, client:Client) -> tuple[str|None, ResponseCode]:
         """Handle get-client-commands command from client by sending the Enum-content."""
 
         command:ClientCommand = ClientCommand.GET_CLIENT_COMMANDS
 
         # Check if client is allowed to execute this command.
-        if client.permission.value < command.value.client_permission.value:
+        if not check_if_client_is_allowed_to_execute_client_command(client.client_type, client.permission, command):
             # Client doesn't have sufficient permissions.
             logging.debug(f"{client.repr_str} Client has insufficient permissions to get a list of all available client-commands.")
             return (None, ResponseCode.NOT_ALLOWED_COMMAND_ERROR)
@@ -558,14 +557,15 @@ class Server:
         # Get help-string.
         help_dict:dict = {}
         for client_command in ClientCommand:
-            if client.permission.value < client_command.value.client_permission.value:
+            if not check_if_client_is_allowed_to_execute_client_command(client.client_type, client.permission, client_command):
                 # Client is not allowed to execute the command, so it doesn't need it.
                 continue
+
             help_dict[client_command.value.command_str] = {'params':client_command.value.params}
 
         help_string:str = json.dumps(help_dict)
 
-        logging.debug(f"{client.repr_str} Got help-string for client ({len(help_string} Bytes)")
+        logging.debug(f"{client.repr_str} Got help-string for client ({len(help_string)} Bytes)")
 
         return (help_string, ResponseCode.NO_ERROR)
 
@@ -578,7 +578,7 @@ class Server:
         command:ClientCommand = ClientCommand.CREATE_USER
 
         # Check if client is allowed to execute this command.
-        if client.permission.value < command.value.client_permission.value:
+        if not check_if_client_is_allowed_to_execute_client_command(client.client_type, client.permission, command):
             # Client doesn't have sufficient permissions.
             logging.debug(f"{client.repr_str} Client has insufficient permissions to create a new user.")
             return (None, ResponseCode.NOT_ALLOWED_COMMAND_ERROR)

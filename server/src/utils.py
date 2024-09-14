@@ -3,6 +3,13 @@ import ipaddress
 #
 from .constants import *
 
+def check_if_client_is_allowed_to_execute_client_command(client_type:ClientType, client_permission:ClientPermission, command:ClientCommand) -> bool:
+    """Check if client with given attributes is allowed to execute given client-command."""
+
+    if client_permission.value < command.value.client_permission.value or client_type not in command.value.allowed_client_types:
+        return False
+
+    return True
 
 def check_host(host:str) -> bool:
     """Check if given host is a valid hostname or IP-Address."""

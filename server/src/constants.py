@@ -6,7 +6,7 @@ class ClientType(Enum):
     UNKNOWN = -1
     ADMIN_CLIENT = 0
     WEATHER_STATION = 1
-    DATA_VIRTUALIZER = 2
+    DATA_VISUALIZER = 2
 
 
 class ClientPermission(Enum):
@@ -34,23 +34,25 @@ class MessageFlag(Enum):
     BEGIN_BUFFERING = "!~BEGINBUFFERING~!"
     END_BUFFERING = "!~ENDBUFFERING~!"
 
-# Define a Command structure with named fields for clarity
-Command = namedtuple('Command', ['client_permission', 'command_str', 'params'])
-
+# Define a CoreCommand structure with named fields for clarity.
+Core_Command = namedtuple('Core_Command', ['client_permission', 'command_str', 'params'])
 
 class CoreCommand(Enum):
-    CLOSE_CONNECTION = Command(ClientPermission.NORMAL, "!#CloseConnection#!", ())
+    CLOSE_CONNECTION = Core_Command(ClientPermission.NORMAL, "!#CloseConnection#!", ())
 
-    AUTHENTICATION_REQUEST = Command(ClientPermission.NORMAL, "!#AuthenticationRequest#!",
+    AUTHENTICATION_REQUEST = Core_Command(ClientPermission.NORMAL, "!#AuthenticationRequest#!",
                             ( ("<USERNAME>", "</USERNAME>"), ("<PASSWORD>", "</PASSWORD>") ))
 
+# Define a ClientCommand structure with named fields for clarity.
+Client_Command = namedtuple('Client_Command', ['allowed_client_types', 'client_permission', 'command_str', 'params'])
+
 class ClientCommand(Enum):
-    CREATE_USER = Command(ClientPermission.ROOT, "!#CreateUser#!",
+    CREATE_USER = Client_Command((ClientType.ADMIN_CLIENT,), ClientPermission.ROOT, "!#CreateUser#!",
                             ( ("<USERNAME>", "</USERNAME>"), ("<PASSWORD>", "</PASSWORD>"),
                               ("<CLIENTTYPE>","</CLIENTTYPE>"), ("<CLIENTPERMISSION>", "</CLIENTPERMISSION>") ))
 
-    SEND_WEATHER_REPORT = Command(ClientPermission.NORMAL, "!#SendWeatherReport#!",
+    SEND_WEATHER_REPORT = Client_Command((ClientType.WEATHER_STATION, ), ClientPermission.NORMAL, "!#SendWeatherReport#!",
                             ( ("<METADATA_WEATHERSTATIONLOCATION>", "</METADATA_WEATHERSTATION_LOCATION>"),
                               ("<METADATA_TIMESTAMP>", "</METADATA_TIMESTAMP>"), ("<WEATHERDATA>", "</WEATHERDATA>") ))
 
-    GET_CLIENT_COMMANDS = Command(ClientPermission.NORMAL, "!#GetClientCommands#!", ())
+    GET_CLIENT_COMMANDS = Client_Command((ClientType.ADMIN_CLIENT, ClientType.DATA_VISUALIZER), ClientPermission.NORMAL, "!#GetClientCommands#!", ())
