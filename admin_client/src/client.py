@@ -298,6 +298,11 @@ class Client:
                             if len(user_input) == 0:
                                 continue
 
+                            resp_for_server:str|None = self.handle_possible_client_commands(user_input)
+
+                            if resp_for_server:
+                                user_input = resp_for_server
+
                             if not self.send_msg(user_input):
                                 self.logger.error("Couldn't send user-input to server!")
 
@@ -340,8 +345,45 @@ class Client:
         if self.client_ssl_socket:
             self.client_ssl_socket.close()
 
+    def handle_possible_client_commands(self, user_input:str) -> str|None:
+        """Handle possible client commands in the user-input."""
+
+        if len(user_input) == 0:
+            return None
+
+        selected_command:str|None = None
+
+        for client_command in self._client_commands:
+            if user_input.lower() in client_command.lower():
+                # Valid command.
+                selected_command = client_command
+                break
+
+        if not selected_command:
+            # User input isn't a known client-command.
+            return False
+
+        response_for_server:str = f"{selected_command}"
+        self.logger.info(f"Selected command: {selected_command}")
+        if len(self._client_commands[selected_command]['params']) == 0:
+            return response_for_server
+        for param in self._client_commands[selected_command]['params']:
+            try:
+                param_value:str = input(f"{param[0]}> ")
+                response_for_server += f"{param[0]}{param_value}{param[1]}"
+            except KeyboardInterrupt as _e:
+                self.logger.warning(f"Detected a keyboard-interruption.")
+                return None
+            except Exception as _e:
+                self.logger.error("An unexpected error occured while trying to get paramters")
+                return None
+
+        return response_for_server
+
     def get_client_commands(self) -> bool:
         """Get Client-Commannds from server."""
+
+        self.logger.info(f"Getting client-commands from server", progress=True)
 
         if not self._connection_status:
             self.logger.error("Something went wrong. Cannot ask for client-commands via a closed connection.")
@@ -371,6 +413,7 @@ class Client:
             help_string:str = response[0]
             help_dict:dict = json.loads(help_string)
             self._client_commands = help_dict
+            self.logger.info(f"Received {len(self._client_commands.keys())} client-commands.")
             return True
         except Exception as _e:
             self.logger.error(f"An unexpected error occured while trying to get help-dictionary: {_e}")
@@ -380,6 +423,7 @@ class Client:
     def connection_configuration(self) -> bool:
         """Receive connection-configuration string and update buffer_size + max_chunk_size."""
 
+        self.logger.info(f"Current & default connection configuration: buffer_size={self.buffer_size} | max_msg_chunk_size={self.max_msg_chunk_size}")
         self.logger.info("Receiving connection-configuration-string from server", progress=True)
 
         (status, response) = self.recv_msg()
@@ -406,6 +450,7 @@ class Client:
             return False
 
         self.logger.info("Updated connection-configurations.")
+        self.logger.info(f"«Connection-Configuration» Buffer-Size={self.buffer_size} | Max-Msg-Chunk-Size={self.max_msg_chunk_size}")
 
         return True
 

@@ -47,12 +47,28 @@ class CoreCommand(Enum):
 Client_Command = namedtuple('Client_Command', ['allowed_client_types', 'client_permission', 'command_str', 'params'])
 
 class ClientCommand(Enum):
-    CREATE_USER = Client_Command((ClientType.ADMIN_CLIENT,), ClientPermission.ROOT, "!#CreateUser#!",
+    CREATE_USER = Client_Command((ClientType.ADMIN_CLIENT, ), ClientPermission.ROOT, "!#CreateUser#!",
                             ( ("<USERNAME>", "</USERNAME>"), ("<PASSWORD>", "</PASSWORD>"),
                               ("<CLIENTTYPE>","</CLIENTTYPE>"), ("<CLIENTPERMISSION>", "</CLIENTPERMISSION>") ))
 
-    SEND_WEATHER_REPORT = Client_Command((ClientType.WEATHER_STATION, ), ClientPermission.NORMAL, "!#SendWeatherReport#!",
-                            ( ("<METADATA_WEATHERSTATIONLOCATION>", "</METADATA_WEATHERSTATION_LOCATION>"),
-                              ("<METADATA_TIMESTAMP>", "</METADATA_TIMESTAMP>"), ("<WEATHERDATA>", "</WEATHERDATA>") ))
-
     GET_CLIENT_COMMANDS = Client_Command((ClientType.ADMIN_CLIENT, ClientType.DATA_VISUALIZER), ClientPermission.NORMAL, "!#GetClientCommands#!", ())
+
+    REGISTER_NEW_WEATHER_STATION = Client_Command((ClientType.ADMIN_CLIENT, ), ClientPermission.ROOT, "!#RegisterNewWeatherStation#!",
+                            ( ("<USER_USERNAME>", "</USER_USERNAME>"), ("<STATION_NAME>", "</STATION_NAME>"),
+                              ("<STATION_LOCATION>", "</STATION_LOCATION>") ))
+
+    GET_REGISTERED_WEATHER_STATIONS_BY_USERNAME = Client_Command((ClientType.ADMIN_CLIENT, ), ClientPermission.ROOT, "!#GetRegisteredWeatherStationsByUsername#!",
+                            ( ("<USER_USERNAME>", "</USER_USERNAME>"), ))
+
+    SEND_WEATHER_REPORT_BY_STATION_ID = Client_Command((ClientType.WEATHER_STATION, ), ClientPermission.NORMAL, "!#SendWeatherReportByStationID#!",
+                            ( ("<WEATHER_STATION_ID>", "</WEATHER_STATION_ID>"),
+                              ("<TIMESTAMP>", "</TIMESTAMP>"), ("<CURRENT_TEMP_K>", "</CURRENT_TEMP_K>"), ("<CURRENT_WIND_SPEED_MPH>", "</CURRENT_WIND_SPEED_MPH>"),
+                              ("<CURRENT_HUMIDITY_PERCENT>", "</CURRENT_HUMIDITY_PERCENT>") ))
+
+    GET_ALL_USERS = Client_Command((ClientType.ADMIN_CLIENT, ), ClientPermission.ROOT, "!#GetAllUsers#!", ())
+
+    DELETE_USER_BY_USERNAME = Client_Command((ClientType.ADMIN_CLIENT, ), ClientPermission.ROOT, "!#DeleteUserByUsername#!",
+                            ( ("<USERNAME>", "</USERNAME>"), ))
+
+    DELETE_WEATHER_STATION_BY_STATION_ID = Client_Command((ClientType.ADMIN_CLIENT, ), ClientPermission.ROOT, "!#DeleteWeatherStationByStationID#!",
+                            ( ("<STATION_ID>","</STATION_ID>"), ))

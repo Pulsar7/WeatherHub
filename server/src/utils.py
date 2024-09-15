@@ -1,7 +1,22 @@
+import re
 import socket
+import string
 import ipaddress
 #
 from .constants import *
+
+
+def check_station_location(location_string:str) -> bool:
+    """Check if a given location-string is valid accordingly to the ISO 6709 standard."""
+
+    pattern:str = r"^[+-]?\d{1,2}(?:\.\d+)?[+-]?\d{1,3}(?:\.\d+)?(?:/[+-]?\d+(?:\.\d+)?)?$"
+    regex = re.compile(pattern)
+
+    if regex.match(location_string):
+        return True
+    else:
+        return False
+
 
 def check_if_client_is_allowed_to_execute_client_command(client_type:ClientType, client_permission:ClientPermission, command:ClientCommand) -> bool:
     """Check if client with given attributes is allowed to execute given client-command."""
@@ -68,10 +83,11 @@ def check_if_specific_valid_client_command(command:str, client_command:ClientCom
         return False
 
     if not isinstance(client_command, ClientCommand):
-        raise TypeError("Given client-commannd has to be from the type ClientCommand.")
+        raise TypeError("Given client-command has to be from the type ClientCommand.")
 
     if client_command.value.command_str not in command:
         return False
+
 
     if len(client_command.value.params) == 0:
         if len(command) > len(client_command.value.command_str):

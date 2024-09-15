@@ -1,6 +1,6 @@
 import bcrypt
 #
-from .models import User
+from .models import User, Station
 from .database_manager import session
 from src.constants import ClientType, ClientPermission
 
@@ -27,17 +27,63 @@ def authenticate_user(username:str, password:str) -> bool:
 
 
 def create_user(username:str, password:str, client_type:ClientType, client_permission:ClientPermission) -> User|None:
-    """Create a new user and add to the database."""
+    """Create a new user."""
 
     if get_user_by_username(username):
         return None
 
-    new_user = User(username=username, password=hash_password(password), client_type=client_type, client_permission=client_permission)
-    session.add(new_user)
-    session.commit()
+    try:
+        new_user = User(username=username, password=hash_password(password), client_type=client_type, client_permission=client_permission)
+        session.add(new_user)
+        session.commit()
+    except Exception as _e:
+        return None
     return new_user
+
+def create_new_station(user_id, station_name:str, station_location:str) -> User|None:
+    """Create a new weather-station."""
+
+    try:
+        new_station = Station(user_id=user_id, station_name=station_name, station_location=station_location)
+        session.add(new_station)
+        session.commit()
+    except Exception as _e:
+        return None
+    return new_station
+
+def get_all_users() -> list[User]:
+    """Fetch all users."""
+    return session.query(User).all()
 
 def get_user_by_username(username:str) -> User|None:
     """Fetch a user by their username."""
 
     return session.query(User).filter_by(username=username).first()
+
+def get_station_by_name(station_name:str) -> Station|None:
+    """Fetch a station by their station-name."""
+
+    return session.query(Station).filter_by(station_name=station_name).first()
+
+def get_all_stations_by_user(user_id) -> list[Station]|None:
+    """Fetch all stations by their user_id."""
+
+    stations = session.query(Station).filter_by(user_id=user_id).all()
+    return stations if stations else None
+
+
+def delete_user_by_username(username:str) -> bool:
+    """Delete a user by its username."""
+
+    if not get_user_by_username(username):
+        # User does not exist.
+        return False
+    try:
+        user_to_delete = session.query(User).filter_by(username=username).one()
+
+        # Deleting the user will also delete all associated stations
+        session.delete(user_to_delete)
+        session.commit()  # This will trigger the cascade and delete stations
+        return True
+    except Exception as _e:
+        return False

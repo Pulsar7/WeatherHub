@@ -12,7 +12,7 @@ from .utils import *
 from .constants import *
 from .client import Client
 from .custom_exceptions import *
-from .database.utils import create_user, authenticate_user, get_user_by_username
+import src.database.utils as db_utils
 
 
 class Server:
@@ -429,7 +429,7 @@ class Server:
         logging.debug(f"{client.repr_str} Parsed received credentials 'username' & 'password'")
 
         # Validate credentials in database and get `client-type` and `client-permission` if credentials are correct.
-        if not authenticate_user(username, password):
+        if not db_utils.authenticate_user(username, password):
             logging.error("{client.repr_str} Given credentials are wrong.")
             self.send_msg(client, "", ResponseCode.INVALID_CREDENTIALS_ERROR)
             raise ClientAuthenticationFailedException()
@@ -449,7 +449,7 @@ class Server:
 
             # User-Authentication
             self.client_authentication(client)
-            user_data = get_user_by_username(client.username)
+            user_data = db_utils.get_user_by_username(client.username)
 
             if not user_data:
                 logging.critical(f"{client.repr_str} Something went wrong. Client is authenticated, but database couldn't get user-data.")
@@ -543,10 +543,195 @@ class Server:
             # Client wants to get the ClientCommands-list.
             return self.handle_get_client_commands_command(client)
 
+        if check_if_specific_valid_client_command(client_msg, ClientCommand.REGISTER_NEW_WEATHER_STATION):
+            # Client wants to add a new weather-station.
+            return self.handle_register_new_weather_station_command(client, client_msg)
+
+        if check_if_specific_valid_client_command(client_msg, ClientCommand.GET_REGISTERED_WEATHER_STATIONS_BY_USERNAME):
+            # Client wants to get all registered weather-stations by username.
+            return self.handle_get_registered_weather_stations_by_username_command(client, client_msg)
+
+        if check_if_specific_valid_client_command(client_msg, ClientCommand.SEND_WEATHER_REPORT_BY_STATION_ID):
+            # Client wants to add a new weather-station-measurement by station-id.
+            return self.handle_add_weather_report_by_station_id_command(client, client_msg)
+
+        if check_if_specific_valid_client_command(client_msg, ClientCommand.GET_ALL_USERS):
+            # Client wants to get the information about all users in the database.
+            return self.handle_get_all_users_command(client)
+
+        if check_if_specific_valid_client_command(client_msg, ClientCommand.DELETE_USER_BY_USERNAME):
+            # Client wants to delete a specific user by its username.
+            return self.handle_delete_user_by_username_command(client, client_msg)
+
+    def handle_delete_user_by_username_command(self, client:Client, client_msg:str) -> tuple[str|None, ResponseCode]:
+        """Handle user-deletion by its username."""
+
+        command:ClientCommand = ClientCommand.DELETE_USER_BY_USERNAME
+
+        logging.debug(f"{client.repr_str} Client wants to delete a user by its username.")
+
+        # Check if client is allowed to execute this command.
+        if not check_if_client_is_allowed_to_execute_client_command(client.client_type, client.permission, command):
+            # Client doesn't have sufficient permissions.
+            logging.debug(f"{client.repr_str} Clients has insufficient permissions to delete a user by its username.")
+            return (None, ResponseCode.NOT_ALLOWED_COMMAND_ERROR)
+
+        # Get arguments.
+        command_params:str = client_msg.split(command.value.command_str)[1]
+        username:str = command_params.split(command.value.params[0][0])[1].split(command.value.params[0][1])[0]
+
+        # Check if given username is valid.
+        if len(username) == 0:
+            return ("The username can't be empty!", ResponseCode.INVALID_ARGUMENTS_ERROR)
+
+        user = db_utils.get_user_by_username(username)
+
+        if not user:
+            return (f"The username '{username}' does not exist.", ResponseCode.INVALID_ARGUMENTS_ERROR)
+
+        if not db_utils.delete_user_by_username(username):
+            logging.error(f"{client.repr_str} Couldn't delete user by its username '{username}'. Database-Error.")
+            return (f"Couldn't delete the user, because of a database-error.", ResponseCode.DATABASE_ERROR)
+
+        logging.info(f"{client.repr_str} Client deleted the user with the username '{username}'.")
+        return (f"Successfully deleted the user '{username}'.", ResponseCode.NO_ERROR)
+
+
+    def handle_get_all_users_command(self, client:Client) -> tuple[str|None, ResponseCode]:
+        """Sending the client the information about all users in the database."""
+
+        command:ClientCommand = ClientCommand.GET_ALL_USERS
+
+        logging.debug(f"{client.repr_str} Client wants to get all users from the database.")
+
+        # Check if client is allowed to execute this command.
+        if not check_if_client_is_allowed_to_execute_client_command(client.client_type, client.permission, command):
+            # Client doesn't have sufficient permissions.
+            logging.debug(f"{client.repr_str} Client has insufficient permissions to get all users from the database.")
+            return (None, ResponseCode.NOT_ALLOWED_COMMAND_ERROR)
+
+        users:list|None = db_utils.get_all_users()
+        if not users:
+            return ("Couldn't fetch any user from the database. Something went wrong.", ResponseCode.DATABASE_ERROR)
+
+        resp:str = f"\n<---{len(users)} Users--->\n"
+
+        for x, user in enumerate(users):
+            resp += f"({x}) '{user.username}' » ID={user.id} » CLIENT-TYPE={user.client_type} » CLIENT-PERMISSION={user.client_permission} » CREATION-TIMESTAMP={user.creation_timestamp}\n"
+
+        return (resp, ResponseCode.NO_ERROR)
+
+    def handle_add_weather_report_by_station_id_command(self, client:Client, client_msg:str) -> tuple[str|None, ResponseCode]:
+        """Handle new incoming measurements of a weather-station by its station-id."""
+
+        command:ClientCommand = ClientCommand.SEND_WEATHER_REPORT_BY_STATION_ID
+
+        logging.debug(f"{client.repr_str} Client wants to add a weather-report.")
+
+        # Check if client is allowed to execute this command.
+        if not check_if_client_is_allowed_to_execute_client_command(client.client_type, client.permission, command):
+            # Client doesn't have sufficient permissions.
+            logging.debug(f"{client.repr_str} Client has insufficient permissions to add a weather-report to a station by its station-id.")
+            return (None, ResponseCode.NOT_ALLOWED_COMMAND_ERROR)
+
+        return ("This command is in development right now.", ResponseCode.SERVER_ERROR)
+
+    def handle_get_registered_weather_stations_by_username_command(self, client:Client, client_msg:str) -> tuple[str|None, ResponseCode]:
+        """Send client all registered weather-stations by username."""
+
+        command:ClientCommand = ClientCommand.GET_REGISTERED_WEATHER_STATIONS_BY_USERNAME
+
+        logging.debug(f"{client.repr_str} Client wants to get all registered-stations by username.")
+
+        # Check if client is allowed to execute this command.
+        if not check_if_client_is_allowed_to_execute_client_command(client.client_type, client.permission, command):
+            # Client doesn't have sufficient permissions.
+            logging.debug(f"{client.repr_str} Client has insufficient permissions to get all registered weather-stations by username.")
+            return (None, ResponseCode.NOT_ALLOWED_COMMAND_ERROR)
+
+        # Get arguments.
+        command_params:str = client_msg.split(command.value.command_str)[1]
+        user_username:str = command_params.split(command.value.params[0][0])[1].split(command.value.params[0][1])[0]
+
+        # Check if given username is valid.
+        if len(user_username) == 0:
+            return ("The user-username can't be empty!", ResponseCode.INVALID_ARGUMENTS_ERROR)
+
+        user = db_utils.get_user_by_username(user_username)
+
+        if not user:
+            return (f"The user-username '{user_username}' does not exist.", ResponseCode.INVALID_ARGUMENTS_ERROR)
+
+        stations:list|None = db_utils.get_all_stations_by_user(user_id=user.id)
+        if not stations:
+            logging.debug(f"{client.repr_str} Couldn't find any weather-station of user '{user.username}'")
+            return (f"Couldn't find any weather-station of user '{user.username}'", ResponseCode.NO_ERROR)
+
+        stations_information:str = f"\n<--- Found {len(stations)} weather-stations of user '{user.username}' --->\n"
+        for x, station in enumerate(stations):
+            stations_information += f"({x+1}) Station-Name: {station.station_name} » Station-Location: {station.station_location}\n"
+
+        return (stations_information, ResponseCode.NO_ERROR)
+
+
+    def handle_register_new_weather_station_command(self, client:Client, client_msg:str) -> tuple[str|None, ResponseCode]:
+        """Handle new weather-station registration."""
+
+        command:ClientCommand = ClientCommand.REGISTER_NEW_WEATHER_STATION
+
+        logging.debug(f"{client.repr_str} Client is trying to register a new weather-station.")
+
+        # Check if client is allowed to execute this command.
+        if not check_if_client_is_allowed_to_execute_client_command(client.client_type, client.permission, command):
+            # Client doesn't have sufficient permissions.
+            logging.debug(f"{client.repr_str} Client has insufficient permissions to register a new weather-station.")
+            return (None, ResponseCode.NOT_ALLOWED_COMMAND_ERROR)
+
+        # Get arguments.
+        command_params:str = client_msg.split(command.value.command_str)[1]
+        user_username:str = command_params.split(command.value.params[0][0])[1].split(command.value.params[0][1])[0]
+        station_name:str = command_params.split(command.value.params[1][0])[1].split(command.value.params[1][1])[0]
+        station_location:str = command_params.split(command.value.params[2][0])[1].split(command.value.params[2][1])[0]
+
+        # Check if given username is valid.
+        if len(user_username) == 0:
+            return ("The user-username can't be empty!", ResponseCode.INVALID_ARGUMENTS_ERROR)
+
+        user = db_utils.get_user_by_username(user_username)
+
+        if not user:
+            return (f"The user-username '{user_username}' does not exist.", ResponseCode.INVALID_ARGUMENTS_ERROR)
+
+        # Check if station-name is valid.
+        if len(station_name) == 0:
+            return ("The station-name can't be empty!", ResponseCode.INVALID_ARGUMENTS_ERROR)
+
+        if db_utils.get_station_by_name(station_name):
+            # Station with the same name already exists.
+            return (f"A station already exists with the name '{station_name}'.", ResponseCode.INVALID_ARGUMENTS_ERROR)
+
+        # Check if station-location is valid.
+        if len(station_location) == 0:
+            return ("The station-location can't be empty!", ResponseCode.INVALID_ARGUMENTS_ERROR)
+
+        if not check_station_location(station_location):
+            # Station-Location is invalid.
+            return ("Invalid station-location. Please use the ISO 6709 standard.", ResponseCode.INVALID_ARGUMENTS_ERROR)
+
+        if not db_utils.create_new_station(user.id, station_name, station_location):
+            # Database-Error
+            return (f"Couldn't add the station with the name '{station_name}' (location='{station_location}') , due to a database-error.", ResponseCode.DATABASE_ERROR)
+
+        logging.info(f"{client.repr_str} Registered a new weather-station with with the name '{station_name}' at the location '{station_location}' for the user '{user.username}'.")
+
+        return (f"Created new station with the name '{station_name}' (location='{station_location}')", ResponseCode.NO_ERROR)
+
     def handle_get_client_commands_command(self, client:Client) -> tuple[str|None, ResponseCode]:
         """Handle get-client-commands command from client by sending the Enum-content."""
 
         command:ClientCommand = ClientCommand.GET_CLIENT_COMMANDS
+
+        logging.debug(f"{client.repr_str} Client asks for available client-commands.")
 
         # Check if client is allowed to execute this command.
         if not check_if_client_is_allowed_to_execute_client_command(client.client_type, client.permission, command):
@@ -565,7 +750,7 @@ class Server:
 
         help_string:str = json.dumps(help_dict)
 
-        logging.debug(f"{client.repr_str} Got help-string for client ({len(help_string)} Bytes)")
+        logging.info(f"{client.repr_str} Got help-string for client ({len(help_string)} Bytes)")
 
         return (help_string, ResponseCode.NO_ERROR)
 
@@ -585,11 +770,17 @@ class Server:
 
         # Get arguments
         command_params:str = client_msg.split(command.value.command_str)[1]
-        username:str = command_params.split(command.value.params[0][0])[1].split(command.params[0][1])[0]
-        password:str = command_params.split(command.value.params[1][0])[1].split(command.params[1][1])[0]
+        username:str = command_params.split(command.value.params[0][0])[1].split(command.value.params[0][1])[0]
+        password:str = command_params.split(command.value.params[1][0])[1].split(command.value.params[1][1])[0]
         try:
-            client_type:ClientType = ClientType(int(command_params.split(command.value.params[2][0])[1].split(command.params[2][1])[0]))
-            client_permission:ClientPermission = ClientPermission(int(command_params.split(command.value.params[3][0])[1].split(command.params[3][1])[0]))
+            client_type:ClientType = ClientType(int(command_params.split(command.value.params[2][0])[1].split(command.value.params[2][1])[0]))
+            client_permission:ClientPermission = ClientPermission(int(command_params.split(command.value.params[3][0])[1].split(command.value.params[3][1])[0]))
+            if client_type == ClientType.UNKNOWN:
+                # Cannot set a user as UNKNOWN.
+                raise ValueError("Cannot set a user client-type to UNKNOWN.")
+            if client_permission == ClientPermission.UNKNOWN:
+                # Cannot set a user as UNKNOWN.
+                raise ValueError("Cannot set a user client-permission to UNKNOWN.")
         except ValueError as _e:
             # Given client-type or/and client_permission is invalid.
             return ("Given client-type or/and client-permission is invalid.", ResponseCode.INVALID_ARGUMENTS_ERROR)
@@ -598,11 +789,15 @@ class Server:
         if len(username) == 0:
             return ("The username can't be empty!", ResponseCode.INVALID_ARGUMENTS_ERROR)
 
-        if not create_user(username=username, password=password, client_type=client_type, client_permission=client_permission):
-            # Couldn't create new user.
-            return ("Choose another username.", ReseponseCode.DATABASE_ERROR)
+        if db_utils.get_user_by_username(username):
+            # Username already exists.
+            return (f"The username '{username}' is already in use. Choose another one.", ResponseCode.INVALID_ARGUMENTS_ERROR)
 
-        logging.debug(f"{client.repr_str} Client created a new user with the username '{username}'")
+        if not db_utils.create_user(username=username, password=password, client_type=client_type, client_permission=client_permission):
+            # Couldn't create new user.
+            return (f"Something went wrong while trying to create a user with the username '{username}'", ResponseCode.DATABASE_ERROR)
+
+        logging.info(f"{client.repr_str} Client created a new user with the username '{username}'")
 
         return (f"Created new User '{username}'.", ResponseCode.NO_ERROR)
 
