@@ -526,54 +526,37 @@ class Server:
     def handle_client_valid_command(self, client:Client, client_msg:str) -> tuple[str|None, ResponseCode]:
         """Handle all possible client-commands."""
 
-        # Check all CoreCommands.
+        command_map = {
+            ClientCommand.CREATE_USER: [self.handle_create_user_command, True],
+            ClientCommand.GET_CLIENT_COMMANDS: [self.handle_get_client_commands_command, False],
+            ClientCommand.REGISTER_NEW_WEATHER_STATION: [self.handle_register_new_weather_station_command, True],
+            ClientCommand.GET_REGISTERED_WEATHER_STATIONS_BY_USERNAME: [self.handle_get_registered_weather_stations_by_username_command, True],
+            ClientCommand.SEND_WEATHER_REPORT_BY_STATION_NAME: [self.handle_add_weather_report_by_station_name_command, True],
+            ClientCommand.DELETE_USER_BY_USERNAME: [self.handle_get_all_users_command, False],
+            ClientCommand.DELETE_WEATHER_STATION_BY_STATION_NAME: [self.handle_delete_weather_station_by_station_name, True],
+            ClientCommand.GET_ALL_MY_STATIONS: [self.handle_get_all_my_stations, False],
+            ClientCommand.SHOW_ALL_CONNECTED_CLIENTS: [self.handle_show_all_connected_clients, False],
+            ClientCommand.CHANGE_MY_PASSWORD: [self.handle_change_my_user_password, True]
+        }
 
+        # Core command: Check for the CLOSE_CONNECTION command first
         if check_if_specific_valid_core_command(client_msg, CoreCommand.CLOSE_CONNECTION):
-            # Client wants to close the connection
             return (None, ResponseCode.NO_ERROR)
 
+        # Iterate through the command map
+        for command in command_map.keys():
+            if check_if_specific_valid_client_command(client_msg, command):
+                if command_map[command][1]:
+                    return command_map[command][0](client, client_msg)
+                return command_map[command][0](client)
 
-        # Check all ClientCommands.
+        # If no valid command found, return an error or handle it accordingly
+        # Shouldn't be reachable, because the command-validation was executed before this function.
+        return (None, ResponseCode.UNKNOWN_COMMAND_ERROR)
 
-        if check_if_specific_valid_client_command(client_msg, ClientCommand.CREATE_USER):
-            # Client wants to create an user.
-            return self.handle_create_user_command(client, client_msg)
 
-        if check_if_specific_valid_client_command(client_msg, ClientCommand.GET_CLIENT_COMMANDS):
-            # Client wants to get the ClientCommands-list.
-            return self.handle_get_client_commands_command(client)
-
-        if check_if_specific_valid_client_command(client_msg, ClientCommand.REGISTER_NEW_WEATHER_STATION):
-            # Client wants to add a new weather-station.
-            return self.handle_register_new_weather_station_command(client, client_msg)
-
-        if check_if_specific_valid_client_command(client_msg, ClientCommand.GET_REGISTERED_WEATHER_STATIONS_BY_USERNAME):
-            # Client wants to get all registered weather-stations by username.
-            return self.handle_get_registered_weather_stations_by_username_command(client, client_msg)
-
-        if check_if_specific_valid_client_command(client_msg, ClientCommand.SEND_WEATHER_REPORT_BY_STATION_NAME):
-            # Client wants to add a new weather-station-measurement by station-name.
-            return self.handle_add_weather_report_by_station_name_command(client, client_msg)
-
-        if check_if_specific_valid_client_command(client_msg, ClientCommand.GET_ALL_USERS):
-            # Client wants to get the information about all users in the database.
-            return self.handle_get_all_users_command(client)
-
-        if check_if_specific_valid_client_command(client_msg, ClientCommand.DELETE_USER_BY_USERNAME):
-            # Client wants to delete a specific user by its username.
-            return self.handle_delete_user_by_username_command(client, client_msg)
-
-        if check_if_specific_valid_client_command(client_msg, ClientCommand.DELETE_WEATHER_STATION_BY_STATION_NAME):
-            # Client wants to delete a weather-station by its station-name.
-            return self.handle_delete_weather_station_by_station_name(client, client_msg)
-
-        if check_if_specific_valid_client_command(client_msg, ClientCommand.GET_ALL_MY_STATIONS):
-            # Client wants to get the information about all of its own weather-stations.
-            return self.handle_get_all_my_stations(client)
-
-        if check_if_specific_valid_client_command(client_msg, ClientCommand.SHOW_ALL_CONNECTED_CLIENTS):
-            # Client wants to get the information about all connected clients.
-            return self.handle_show_all_connected_clients(client)
+    def handle_change_my_user_password(self, client:Client, client_msg:str) -> tuple[str|None, ResponseCode]:
+        pass
 
     def handle_show_all_connected_clients(self, client:Client) -> tuple[str|None, ResponseCode]:
         """Send client information about all connected clients."""

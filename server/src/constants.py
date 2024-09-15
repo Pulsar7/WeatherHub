@@ -76,3 +76,6 @@ class ClientCommand(Enum):
     GET_ALL_MY_STATIONS = Client_Command((ClientType.ADMIN_CLIENT, ), ClientPermission.NORMAL, "!#GetAllMyStations#!", ())
 
     SHOW_ALL_CONNECTED_CLIENTS = Client_Command((ClientType.ADMIN_CLIENT, ), ClientPermission.ROOT, "!#ShowAllConnectedClients#!", ())
+
+    CHANGE_MY_PASSWORD = Client_Command((ClientType.ADMIN_CLIENT, ), ClientPermission.ROOT, "!#ChangeMyPassword#!",
+                            ( ("<NEW_PASSWORD>", "</NEW_PASSWORD>") ))
