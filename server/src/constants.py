@@ -60,8 +60,8 @@ class ClientCommand(Enum):
     GET_REGISTERED_WEATHER_STATIONS_BY_USERNAME = Client_Command((ClientType.ADMIN_CLIENT, ), ClientPermission.ROOT, "!#GetRegisteredWeatherStationsByUsername#!",
                             ( ("<USER_USERNAME>", "</USER_USERNAME>"), ))
 
-    SEND_WEATHER_REPORT_BY_STATION_ID = Client_Command((ClientType.WEATHER_STATION, ), ClientPermission.NORMAL, "!#SendWeatherReportByStationID#!",
-                            ( ("<WEATHER_STATION_ID>", "</WEATHER_STATION_ID>"),
+    SEND_WEATHER_REPORT_BY_STATION_NAME = Client_Command((ClientType.WEATHER_STATION, ), ClientPermission.NORMAL, "!#SendWeatherReportByStationName#!",
+                            ( ("<WEATHER_STATION_NAME>", "</WEATHER_STATION_NAME>"),
                               ("<TIMESTAMP>", "</TIMESTAMP>"), ("<CURRENT_TEMP_K>", "</CURRENT_TEMP_K>"), ("<CURRENT_WIND_SPEED_MPH>", "</CURRENT_WIND_SPEED_MPH>"),
                               ("<CURRENT_HUMIDITY_PERCENT>", "</CURRENT_HUMIDITY_PERCENT>") ))
 
@@ -70,5 +70,9 @@ class ClientCommand(Enum):
     DELETE_USER_BY_USERNAME = Client_Command((ClientType.ADMIN_CLIENT, ), ClientPermission.ROOT, "!#DeleteUserByUsername#!",
                             ( ("<USERNAME>", "</USERNAME>"), ))
 
-    DELETE_WEATHER_STATION_BY_STATION_ID = Client_Command((ClientType.ADMIN_CLIENT, ), ClientPermission.ROOT, "!#DeleteWeatherStationByStationID#!",
-                            ( ("<STATION_ID>","</STATION_ID>"), ))
+    DELETE_WEATHER_STATION_BY_STATION_NAME = Client_Command((ClientType.ADMIN_CLIENT, ), ClientPermission.ROOT, "!#DeleteWeatherStationByStationName#!",
+                            ( ("<STATION_NAME>","</STATION_NAME>"), ))
+
+    GET_ALL_MY_STATIONS = Client_Command((ClientType.ADMIN_CLIENT, ), ClientPermission.NORMAL, "!#GetAllMyStations#!", ())
+
+    SHOW_ALL_CONNECTED_CLIENTS = Client_Command((ClientType.ADMIN_CLIENT, ), ClientPermission.ROOT, "!#ShowAllConnectedClients#!", ())

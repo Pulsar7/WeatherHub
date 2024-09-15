@@ -131,4 +131,4 @@ class Client:
 
     @property
     def repr_str(self) -> str:
-        return f"<{self.client_type}/{self.permission}#{self.username}@{self.client_addr[0]}>"
+        return f"<{self.client_type}/{self.permission}#{self.username}@{self.client_addr[0]}:{self.client_addr[1]}>"

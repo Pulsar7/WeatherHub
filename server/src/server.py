@@ -551,9 +551,9 @@ class Server:
             # Client wants to get all registered weather-stations by username.
             return self.handle_get_registered_weather_stations_by_username_command(client, client_msg)
 
-        if check_if_specific_valid_client_command(client_msg, ClientCommand.SEND_WEATHER_REPORT_BY_STATION_ID):
-            # Client wants to add a new weather-station-measurement by station-id.
-            return self.handle_add_weather_report_by_station_id_command(client, client_msg)
+        if check_if_specific_valid_client_command(client_msg, ClientCommand.SEND_WEATHER_REPORT_BY_STATION_NAME):
+            # Client wants to add a new weather-station-measurement by station-name.
+            return self.handle_add_weather_report_by_station_name_command(client, client_msg)
 
         if check_if_specific_valid_client_command(client_msg, ClientCommand.GET_ALL_USERS):
             # Client wants to get the information about all users in the database.
@@ -562,6 +562,105 @@ class Server:
         if check_if_specific_valid_client_command(client_msg, ClientCommand.DELETE_USER_BY_USERNAME):
             # Client wants to delete a specific user by its username.
             return self.handle_delete_user_by_username_command(client, client_msg)
+
+        if check_if_specific_valid_client_command(client_msg, ClientCommand.DELETE_WEATHER_STATION_BY_STATION_NAME):
+            # Client wants to delete a weather-station by its station-name.
+            return self.handle_delete_weather_station_by_station_name(client, client_msg)
+
+        if check_if_specific_valid_client_command(client_msg, ClientCommand.GET_ALL_MY_STATIONS):
+            # Client wants to get the information about all of its own weather-stations.
+            return self.handle_get_all_my_stations(client)
+
+        if check_if_specific_valid_client_command(client_msg, ClientCommand.SHOW_ALL_CONNECTED_CLIENTS):
+            # Client wants to get the information about all connected clients.
+            return self.handle_show_all_connected_clients(client)
+
+    def handle_show_all_connected_clients(self, client:Client) -> tuple[str|None, ResponseCode]:
+        """Send client information about all connected clients."""
+
+        command:ClientCommand = ClientCommand.SHOW_ALL_CONNECTED_CLIENTS
+
+        logging.debug(f"{client.repr_str} Client wants to get information about all connected clients.")
+
+        # Check if client is allowed to execute this command.
+        if not check_if_client_is_allowed_to_execute_client_command(client.client_type, client.permission, command):
+            # Client doesn't have sufficient permissions.
+            logging.debug(f"{client.repr_str} Clients has insufficient permissions to get information about all connected clients.")
+            return (None, ResponseCode.NOT_ALLOWED_COMMAND_ERROR)
+
+        response_str:str = f"\n<--- There're {len(self._clients)} clients currently connected to the server --->\n"
+        for x, _client in enumerate(self._clients):
+            response_str += f"{'(YOU) ' if client == _client else ''}« [{x+1}] » Address={_client.client_addr} \n| Username={_client.username} \n| Connection-Status={_client.connection_status} \n| Authentication-Status={_client.authentication_status} \n| Client-Type={_client.client_type} \n| Client-Permission={_client.permission}\n"
+            if x < len(self._clients):
+                response_str += "\n"
+
+        return (response_str, ResponseCode.NO_ERROR)
+
+
+    def handle_get_all_my_stations(self, client:Client) -> tuple[str|None, ResponseCode]:
+        """Send the client information about all of its own weather-stations."""
+
+        command:ClientCommand = ClientCommand.GET_ALL_MY_STATIONS
+
+        logging.debug(f"{client.repr_str} Client wants to get information about all of its own weather-stations.")
+
+        # Check if client is allowed to execute this command.
+        if not check_if_client_is_allowed_to_execute_client_command(client.client_type, client.permission, command):
+            # Client doesn't have sufficient permissions.
+            logging.debug(f"{client.repr_str} Clients has insufficient permissions to get information about all of its own weather-stations.")
+            return (None, ResponseCode.NOT_ALLOWED_COMMAND_ERROR)
+
+        user = db_utils.get_user_by_username(client.username)
+
+        if not user:
+            logging.error(f"{client.repr_str} Something went wrong while trying to fetch client's user-data from the database. Might be a database-error.")
+            return (f"Something went wrong -> Your client-username seems to be wrong: '{client.username}'", ResponseCode.SERVER_ERROR)
+
+        stations:list|None = db_utils.get_all_stations_by_user(user_id=user.id)
+        if not stations:
+            logging.debug(f"{client.repr_str} Couldn't find any weather-station of user '{user.username}'")
+            return (f"Couldn't find any weather-station of user '{user.username}'", ResponseCode.NO_ERROR)
+
+        stations_information:str = f"\n<--- Found {len(stations)} weather-stations of user '{user.username}' --->\n"
+        for x, station in enumerate(stations):
+            stations_information += f"({x+1}) Station-ID: {station.id} » Station-Name: {station.station_name} » Station-Location: {station.station_location}\n"
+
+        logging.debug(f"{client.repr_str} Fetched all of '{user.username}'s weather-stations.")
+
+        return (stations_information, ResponseCode.NO_ERROR)
+
+    def handle_delete_weather_station_by_station_name(self, client:Client, client_msg:str) -> tuple[str|None, ResponseCode]:
+        """Handle weather-station-deletion by its station-name."""
+
+        command:ClientCommand = ClientCommand.DELETE_WEATHER_STATION_BY_STATION_NAME
+
+        logging.debug(f"{client.repr_str} Client wants to delete a weather-station by its station-name.")
+
+        # Check if client is allowed to execute this command.
+        if not check_if_client_is_allowed_to_execute_client_command(client.client_type, client.permission, command):
+            # Client doesn't have sufficient permissions.
+            logging.debug(f"{client.repr_str} Clients has insufficient permissions to delete a weather-station by its station-name.")
+            return (None, ResponseCode.NOT_ALLOWED_COMMAND_ERROR)
+
+        # Get arguments.
+        command_params:str = client_msg.split(command.value.command_str)[1]
+        station_name:str = command_params.split(command.value.params[0][0])[1].split(command.value.params[0][1])[0]
+
+        # Check if given station-name is valid.
+        if len(station_name) == 0:
+            return ("The station-name can't be empty!", ResponseCode.INVALID_ARGUMENTS_ERROR)
+
+        station = db_utils.get_station_by_name(station_name)
+
+        if not station:
+            return (f"There is no station with the station-name '{station_name}'.", ResponseCode.INVALID_ARGUMENTS_ERROR)
+
+        if not db_utils.delete_station(station):
+            return (f"Couldn't delete station by its station-name '{station_name}'. Database-Error.", ResponseCode.DATABASE_ERROR)
+
+        logging.info(f"{client.repr_str} Client deleted a station by its station-name '{station_name}'.")
+
+        return (f"Deleted a weather-station by its station-name '{station_name}'.", ResponseCode.NO_ERROR)
 
     def handle_delete_user_by_username_command(self, client:Client, client_msg:str) -> tuple[str|None, ResponseCode]:
         """Handle user-deletion by its username."""
@@ -621,17 +720,17 @@ class Server:
 
         return (resp, ResponseCode.NO_ERROR)
 
-    def handle_add_weather_report_by_station_id_command(self, client:Client, client_msg:str) -> tuple[str|None, ResponseCode]:
+    def handle_add_weather_report_by_station_name_command(self, client:Client, client_msg:str) -> tuple[str|None, ResponseCode]:
         """Handle new incoming measurements of a weather-station by its station-id."""
 
-        command:ClientCommand = ClientCommand.SEND_WEATHER_REPORT_BY_STATION_ID
+        command:ClientCommand = ClientCommand.SEND_WEATHER_REPORT_BY_STATION_NAME
 
-        logging.debug(f"{client.repr_str} Client wants to add a weather-report.")
+        logging.debug(f"{client.repr_str} Client wants to add a weather-report to a station by its station-name.")
 
         # Check if client is allowed to execute this command.
         if not check_if_client_is_allowed_to_execute_client_command(client.client_type, client.permission, command):
             # Client doesn't have sufficient permissions.
-            logging.debug(f"{client.repr_str} Client has insufficient permissions to add a weather-report to a station by its station-id.")
+            logging.debug(f"{client.repr_str} Client has insufficient permissions to add a weather-report to a station by its station-name.")
             return (None, ResponseCode.NOT_ALLOWED_COMMAND_ERROR)
 
         return ("This command is in development right now.", ResponseCode.SERVER_ERROR)
@@ -669,10 +768,9 @@ class Server:
 
         stations_information:str = f"\n<--- Found {len(stations)} weather-stations of user '{user.username}' --->\n"
         for x, station in enumerate(stations):
-            stations_information += f"({x+1}) Station-Name: {station.station_name} » Station-Location: {station.station_location}\n"
+            stations_information += f"({x+1}) Station-ID: {station.id} » Station-Name: {station.station_name} » Station-Location: {station.station_location}\n"
 
         return (stations_information, ResponseCode.NO_ERROR)
-
 
     def handle_register_new_weather_station_command(self, client:Client, client_msg:str) -> tuple[str|None, ResponseCode]:
         """Handle new weather-station registration."""

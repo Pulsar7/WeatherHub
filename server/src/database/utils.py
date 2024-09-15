@@ -43,6 +43,9 @@ def create_user(username:str, password:str, client_type:ClientType, client_permi
 def create_new_station(user_id, station_name:str, station_location:str) -> User|None:
     """Create a new weather-station."""
 
+    if get_station_by_name(station_name):
+        return None
+
     try:
         new_station = Station(user_id=user_id, station_name=station_name, station_location=station_location)
         session.add(new_station)
@@ -71,6 +74,18 @@ def get_all_stations_by_user(user_id) -> list[Station]|None:
     stations = session.query(Station).filter_by(user_id=user_id).all()
     return stations if stations else None
 
+def delete_station(station:Station) -> bool:
+    """Delete a station."""
+
+    if not isinstance(station, Station):
+        return False
+
+    try:
+        session.delete(station)
+        session.commit()
+        return True
+    except Exception as _e:
+        return False
 
 def delete_user_by_username(username:str) -> bool:
     """Delete a user by its username."""
