@@ -2,21 +2,13 @@
 
 A small project to gather weather data from several weather stations, which are connected to a centralized server.
 
-## Installation
+## Server
 
-To create a keyfile and the self-signed certificate for the TLS-encryption, you could use `openssl`:
+The server handles all client-types of this project. It receives and stores measurements of weather-stations in a database. In addition to that, the server then also sends the saved data to 
+data-visualizer-clients. They're responsible to the data-visualization.
 
-```
-# Generate keyfile
-openssl genpkey -algorithm RSA -out keyfile_server.key -aes256
+### Usage
 
-# Generate certificate signing request (CSR) - Fill in your data.
-openssl req -new -key keyfile_server.key -out server.csr \
-    -subj "/C=DE/ST=BIELEFELD/L=BIELEFELD/O=BIELEFELD GmbH/CN=localhost"
-
-# Generate self-signed certificate
-openssl x509 -req -days 365 -in server.csr -signkey keyfile_server.key -out certfile_server.crt
-```
 
 In order to work, you have to create a `server/.env`-file with those values:
 
@@ -35,7 +27,20 @@ DATABASE_URI="sqlite:///instances/database.db"
 RESPONSECODE_SEPARATOR="_#R#_"
 ```
 
-And you need also a `admin-client/.env`:
+Execute server-script manually:
+
+```BASH
+python3 main.py
+```
+
+
+## Admin-Client
+
+This client is for managing the different weather-stations and to get an overview of the current operations on the server.
+
+### Usage
+
+You need to create an environment-file - `admin-client/.env`:
 
 ```
 TIMEZONE="UTC"
@@ -50,9 +55,30 @@ DEFAULT_BUFFER_SIZE=1024
 RESPONSECODE_SEPARATOR="_#R#_"
 ```
 
-
-Execute server-script manually:
+To connect to the server, execute the script like that:
 
 ```BASH
-python3 main.py
+python3 admin_client -s localhost -p 1337
 ```
+
+## Key- & Certfile generation
+
+In order to work, both, the client and the server need a self-signed certificate and a keyfile to establish a TLS-encrypted connection.
+You could to that by using the `openssl` software:
+
+```BASH
+# Generate keyfile
+openssl genpkey -algorithm RSA -out keyfile_server.key -aes256
+
+# Generate certificate signing request (CSR) - Fill in your data.
+openssl req -new -key keyfile_server.key -out server.csr \
+    -subj "/C=DE/ST=BIELEFELD/L=BIELEFELD/O=BIELEFELD GmbH/CN=localhost"
+
+# Generate self-signed certificate
+openssl x509 -req -days 365 -in server.csr -signkey keyfile_server.key -out certfile_server.crt
+```
+
+For the __CSR__ you have to fill in your data. It's important that the __CN__-field-value is the server-hostname.
+And obviously adjust the filepaths of your SSL-files.
+
+
