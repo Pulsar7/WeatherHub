@@ -54,6 +54,20 @@ def create_new_station(user_id, station_name:str, station_location:str) -> User|
         return None
     return new_station
 
+def change_user_password(username:str, new_password:str) -> tuple[bool, str|None]:
+    """Change an user-password."""
+
+    user:User|None = get_user_by_username(username)
+    if not user:
+        return (False, f"Something went wrong. There is no user with the username '{username}'")
+
+    try:
+        user.password = hash_password(new_password)
+        session.commit()
+        return (True, None)
+    except Exception as _e:
+        return (False, str(_e))
+
 def get_all_users() -> list[User]:
     """Fetch all users."""
     return session.query(User).all()
@@ -68,7 +82,7 @@ def get_station_by_name(station_name:str) -> Station|None:
 
     return session.query(Station).filter_by(station_name=station_name).first()
 
-def get_all_stations_by_user(user_id) -> list[Station]|None:
+def get_all_stations_by_user_id(user_id) -> list[Station]|None:
     """Fetch all stations by their user_id."""
 
     stations = session.query(Station).filter_by(user_id=user_id).all()
@@ -87,18 +101,13 @@ def delete_station(station:Station) -> bool:
     except Exception as _e:
         return False
 
-def delete_user_by_username(username:str) -> bool:
-    """Delete a user by its username."""
+def delete_user_by_user(user_to_delete:User) -> tuple[bool, str|None]:
+    """Delete a user by its user-object."""
 
-    if not get_user_by_username(username):
-        # User does not exist.
-        return False
     try:
-        user_to_delete = session.query(User).filter_by(username=username).one()
-
         # Deleting the user will also delete all associated stations
         session.delete(user_to_delete)
         session.commit()  # This will trigger the cascade and delete stations
-        return True
+        return (True, None)
     except Exception as _e:
-        return False
+        return (False, str(_e))

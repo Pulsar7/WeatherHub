@@ -2,6 +2,7 @@ import os
 import ssl
 import json
 import socket
+import getpass
 #
 from .utils import *
 from .config import *
@@ -284,7 +285,7 @@ class Client:
                         try:
                             user_input:str = input(f"{self.client_username}@{self.server_address[0]}:{self.server_address[1]}$> ")
                             # Process user-input
-                            user_input = user_input.strip()
+                            user_input = user_input.strip().replace(" ", "")
                             if any(close_option in user_input.lower() for close_option in ["close","exit"]):
                                 # User wants to close the connection.
                                 self.logger.info("Closing connection to server.")
@@ -310,11 +311,17 @@ class Client:
                             if not status:
                                 self.logger.error("Couldn't receive a response from the server!")
                                 continue
-                            self.logger.info(f"<SERVER> ({resp_code}) {resp_msg}")
+
+                            self.logger.info(f"<SERVER> ({resp_code.value.description}) {resp_msg}")
 
                             if resp_msg == CoreCommand.CLOSE_CONNECTION.value.command_str:
                                 # Server wants to close connection.
                                 self.logger.warning("Server wants to close connection.")
+                                break
+
+                            if resp_code == ResponseCode.FORCE_CONNECTION_CLOSURE:
+                                # Server is forcing client to close the connection.
+                                self.logger.warning("Server is forcing client to re-connect.")
                                 break
 
                         except KeyboardInterrupt as _e:
@@ -345,6 +352,7 @@ class Client:
         if self.client_ssl_socket:
             self.client_ssl_socket.close()
 
+
     def handle_possible_client_commands(self, user_input:str) -> str|None:
         """Handle possible client commands in the user-input."""
 
@@ -369,7 +377,10 @@ class Client:
             return response_for_server
         for param in self._client_commands[selected_command]['params']:
             try:
-                param_value:str = input(f"{param[0]}> ")
+                if any(key in param[0].lower() for key in ["password"]):
+                    param_value:str = getpass.getpass(f"{param[0]}> ")
+                else:
+                    param_value:str = input(f"{param[0]}> ")
                 response_for_server += f"{param[0]}{param_value}{param[1]}"
             except KeyboardInterrupt as _e:
                 self.logger.warning(f"Detected a keyboard-interruption.")

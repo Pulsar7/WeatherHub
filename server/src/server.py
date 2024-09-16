@@ -498,6 +498,12 @@ class Server:
                         # Close connection.
                         logging.info(f"{client.repr_str} Client sent a Close-Connection-Request. Closing connection to client.")
                         break
+                    elif response and response_code == ResponseCode.FORCE_CONNECTION_CLOSURE:
+                        # Force client to close the connection.
+                        logging.info(f"{client.repr_str} Forcing client to close the connection.")
+                        # Sending response to client.
+                        self.send_msg(client, response, response_code)
+                        break
                     elif not response:
                         # Set to empty string.
                         response = ""
@@ -529,6 +535,7 @@ class Server:
         command_map = {
             ClientCommand.CREATE_USER: [self.handle_create_user_command, True],
             ClientCommand.GET_CLIENT_COMMANDS: [self.handle_get_client_commands_command, False],
+            ClientCommand.GET_ALL_USERS: [self.handle_get_all_users_command, False],
             ClientCommand.REGISTER_NEW_WEATHER_STATION: [self.handle_register_new_weather_station_command, True],
             ClientCommand.GET_REGISTERED_WEATHER_STATIONS_BY_USERNAME: [self.handle_get_registered_weather_stations_by_username_command, True],
             ClientCommand.SEND_WEATHER_REPORT_BY_STATION_NAME: [self.handle_add_weather_report_by_station_name_command, True],
@@ -556,7 +563,42 @@ class Server:
 
 
     def handle_change_my_user_password(self, client:Client, client_msg:str) -> tuple[str|None, ResponseCode]:
-        pass
+        """Handle user-password-change of current client-user."""
+
+        command:ClientCommand = ClientCommand.CHANGE_MY_PASSWORD
+
+        logging.debug(f"{client.repr_str} Client wants to change its own user-password.")
+
+        # Check if client is allowed to execute this command.
+        if not check_if_client_is_allowed_to_execute_client_command(client.client_type, client.permission, command):
+            # Client doesn't have sufficient permissions.
+            logging.debug(f"{client.repr_str} Clients has insufficient permissions to change its own user-password.")
+            return (None, ResponseCode.NOT_ALLOWED_COMMAND_ERROR)
+
+        # Get arguments.
+        command_params:str = client_msg.split(command.value.command_str)[1]
+        new_password:str = command_params.split(command.value.params[0][0])[1].split(command.value.params[0][1])[0]
+
+        # Check if given password is valid.
+        if len(new_password) == 0:
+            return ("The password can't be empty!", ResponseCode.INVALID_ARGUMENTS_ERROR)
+
+        user:User|None = db_utils.get_user_by_username(client.username)
+        if not user:
+            logging.error(f"{client.repr_str} An error occured while trying to get client's user-object. It seems, that its username doesn't exist.")
+            return (f"It seems like your client-username is invalid. Please report this error.", ResponseCode.SERVER_ERROR) # or ResponseCode.DATABASE_ERROR
+
+        if db_utils.verify_password(user.password, new_password):
+            return (f"Your new password equals the old one. Nothing to change.", ResponseCode.INVALID_ARGUMENTS_ERROR)
+
+        status, resp_text = db_utils.change_user_password(client.username, new_password)
+        if not status:
+            logging.error(f"{client.repr_str} Couldn't change client's user-password. Database-Error: {resp_text}")
+            return (f"Couldn't change your user-password.", ResponseCode.DATABASE_ERROR)
+
+        logging.info(f"{client.repr_str} Client changed its user-password. Forcing client to re-connect.")
+
+        return (f"Your password has been changed successfully. Please re-authenticate.", ResponseCode.FORCE_CONNECTION_CLOSURE)
 
     def handle_show_all_connected_clients(self, client:Client) -> tuple[str|None, ResponseCode]:
         """Send client information about all connected clients."""
@@ -599,7 +641,7 @@ class Server:
             logging.error(f"{client.repr_str} Something went wrong while trying to fetch client's user-data from the database. Might be a database-error.")
             return (f"Something went wrong -> Your client-username seems to be wrong: '{client.username}'", ResponseCode.SERVER_ERROR)
 
-        stations:list|None = db_utils.get_all_stations_by_user(user_id=user.id)
+        stations:list|None = db_utils.get_all_stations_by_user_id(user_id=user.id)
         if not stations:
             logging.debug(f"{client.repr_str} Couldn't find any weather-station of user '{user.username}'")
             return (f"Couldn't find any weather-station of user '{user.username}'", ResponseCode.NO_ERROR)
@@ -666,13 +708,14 @@ class Server:
         if len(username) == 0:
             return ("The username can't be empty!", ResponseCode.INVALID_ARGUMENTS_ERROR)
 
-        user = db_utils.get_user_by_username(username)
+        user:User|None = db_utils.get_user_by_username(username)
 
         if not user:
-            return (f"The username '{username}' does not exist.", ResponseCode.INVALID_ARGUMENTS_ERROR)
+            return (f"The given username '{username}' does not exist!", ResponseCode.INVALID_ARGUMENTS_ERROR)
 
-        if not db_utils.delete_user_by_username(username):
-            logging.error(f"{client.repr_str} Couldn't delete user by its username '{username}'. Database-Error.")
+        status, resp_text = db_utils.delete_user_by_user(user)
+        if not status:
+            logging.error(f"{client.repr_str} Couldn't delete user by its username '{username}'. -> {resp_text}")
             return (f"Couldn't delete the user, because of a database-error.", ResponseCode.DATABASE_ERROR)
 
         logging.info(f"{client.repr_str} Client deleted the user with the username '{username}'.")
