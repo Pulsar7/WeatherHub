@@ -80,3 +80,6 @@ class ClientCommand(Enum):
 
     CHANGE_MY_PASSWORD = Client_Command((ClientType.ADMIN_CLIENT, ), ClientPermission.NORMAL, "!#ChangeMyPassword#!",
                             ( ("<NEW_PASSWORD>", "</NEW_PASSWORD>"), ))
+
+    CLOSE_ALL_USER_CLIENT_CONNECTIONS_BY_USERNAME = Client_Command((ClientType.ADMIN_CLIENT, ), ClientPermission.ROOT, "!#CloseAllUserClientConnectionsByUsername#!",
+                            ( ("<USERNAME>", "</USERNAME>"), ))

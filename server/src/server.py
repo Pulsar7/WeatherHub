@@ -213,7 +213,7 @@ class Server:
             self.server_ssl_context:ssl.SSLContext = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
             # Force the context to only use TLSv1.3
             self.server_ssl_context.minimum_version = ssl.TLSVersion.TLSv1_3
-            #self.server_ssl_context.maximum_version = ssl.TLSVersion.TLSv1_3
+            self.server_ssl_context.maximum_version = ssl.TLSVersion.TLSv1_3
             # Load certificate and keyfile.
             self.server_ssl_context.load_cert_chain(certfile=self.server_ssl_certfilepath, keyfile=self.server_ssl_keyfilepath, password=self.server_ssl_keyfilepassword)
             return True
@@ -440,6 +440,8 @@ class Server:
     def handle_client(self, client:Client) -> None:
         """Handle every incoming client connection inside a separate thread."""
 
+        logging.info(f"{client.repr_str} The negotiated SSL-Version: {client.ssl_socket.version()}")
+
         try:
             # Sending client the connection-configuration-string.
             if not self.send_msg(client, msg=self.get_connection_config_string()):
@@ -543,7 +545,8 @@ class Server:
             ClientCommand.DELETE_WEATHER_STATION_BY_STATION_NAME: [self.handle_delete_weather_station_by_station_name, True],
             ClientCommand.GET_ALL_MY_STATIONS: [self.handle_get_all_my_stations, False],
             ClientCommand.SHOW_ALL_CONNECTED_CLIENTS: [self.handle_show_all_connected_clients, False],
-            ClientCommand.CHANGE_MY_PASSWORD: [self.handle_change_my_user_password, True]
+            ClientCommand.CHANGE_MY_PASSWORD: [self.handle_change_my_user_password, True],
+            ClientCommand.CLOSE_ALL_USER_CLIENT_CONNECTIONS_BY_USERNAME: [self.handle_close_all_user_client_connections_by_username, True]
         }
 
         # Core command: Check for the CLOSE_CONNECTION command first
@@ -561,6 +564,51 @@ class Server:
         # Shouldn't be reachable, because the command-validation was executed before this function.
         return (None, ResponseCode.UNKNOWN_COMMAND_ERROR)
 
+    def handle_close_all_user_client_connections_by_username(self, client:Client, client_msg:str) -> tuple[str|None, ResponseCode]:
+        """Handle connection-closure of all user-clients by its username."""
+
+        command:ClientCommand = ClientCommand.CLOSE_ALL_USER_CLIENT_CONNECTIONS_BY_USERNAME
+
+        logging.debug(f"{client.repr_str} Client wants to close all connections by their username.")
+
+        # Check if client is allowed to execute this command.
+        if not check_if_client_is_allowed_to_execute_client_command(client.client_type, client.permission, command):
+            # Client doesn't have sufficient permissions.
+            logging.debug(f"{client.repr_str} Clients has insufficient permissions to close all connections by their username.")
+            return (None, ResponseCode.NOT_ALLOWED_COMMAND_ERROR)
+
+        # Get arguments.
+        command_params:str = client_msg.split(command.value.command_str)[1]
+        username:str = command_params.split(command.value.params[0][0])[1].split(command.value.params[0][1])[0]
+
+        # Check if given username is valid.
+        if len(username) == 0:
+            return ("The password can't be empty!", ResponseCode.INVALID_ARGUMENTS_ERROR)
+
+        user:User|None = db_utils.get_user_by_username(username)
+        if not user:
+            return (f"The given username is invalid.", ResponseCode.INVALID_ARGUMENTS_ERROR)
+
+        clients_to_close_conn_to:list[Client] = []
+        resp_text:str = ""
+        if client.username == user.username:
+            resp_text += "This command won't close your connection.\n"
+        for _client in self._clients:
+            if _client.username == user.username:
+                if _client == client:
+                    continue
+                clients_to_close_conn_to.append(_client)
+
+        if len(clients_to_close_conn_to) == 0:
+            resp_text += "There is no connection to close for the given username."
+            return (resp_text, ResponseCode.NO_ERROR)
+
+        resp_text += f"Closing the connection to {len(clients_to_close_conn_to)} client(s)."
+
+        for _client in clients_to_close_conn_to:
+            self.close_client_connection(_client)
+
+        return (resp_text, NO_ERROR)
 
     def handle_change_my_user_password(self, client:Client, client_msg:str) -> tuple[str|None, ResponseCode]:
         """Handle user-password-change of current client-user."""

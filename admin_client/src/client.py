@@ -286,12 +286,12 @@ class Client:
                             user_input:str = input(f"{self.client_username}@{self.server_address[0]}:{self.server_address[1]}$> ")
                             # Process user-input
                             user_input = user_input.strip().replace(" ", "")
-                            if any(close_option in user_input.lower() for close_option in ["close","exit"]):
+                            if any(close_option == user_input.lower() for close_option in ["close","exit"]):
                                 # User wants to close the connection.
                                 self.logger.info("Closing connection to server.")
                                 break
 
-                            if any(help_option in user_input.lower() for help_option in ["help"]):
+                            if any(help_option == user_input.lower() for help_option in ["help"]):
                                 # Printout Client commands.
                                 Console().print(self._client_commands)
                                 continue

@@ -40,7 +40,7 @@ def create_user(username:str, password:str, client_type:ClientType, client_permi
         return None
     return new_user
 
-def create_new_station(user_id, station_name:str, station_location:str) -> User|None:
+def create_new_station(user_id, station_name:str, station_location:str) -> Station|None:
     """Create a new weather-station."""
 
     if get_station_by_name(station_name):
@@ -50,9 +50,9 @@ def create_new_station(user_id, station_name:str, station_location:str) -> User|
         new_station = Station(user_id=user_id, station_name=station_name, station_location=station_location)
         session.add(new_station)
         session.commit()
+        return new_station
     except Exception as _e:
         return None
-    return new_station
 
 def change_user_password(username:str, new_password:str) -> tuple[bool, str|None]:
     """Change an user-password."""
