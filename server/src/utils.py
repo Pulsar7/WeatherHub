@@ -5,6 +5,43 @@ import ipaddress
 #
 from .constants import *
 
+def get_percent_float_from_str(percent_string:str) -> float|None:
+    """Convert the given percent-string to a float."""
+
+    try:
+        percent:float = float(percent_string)
+        if percent > 100 or percent < 0:
+            return None
+        return percent
+    except ValueError as _e:
+        return None
+
+def get_velocity_float_from_str(velocity_string:str) -> float|None:
+    """Convert the given velocity-string to a float."""
+
+    try:
+        velocity:float = float(velocity_string)
+        return velocity
+    except ValueError as _e:
+        return None
+
+def get_temp_float_from_str(temp_string:str) -> float|None:
+    """Convert the given temperature-string to a float."""
+
+    try:
+        temp:float = float(temp_string)
+        return temp
+    except ValueError as _e:
+        return None
+
+def get_timestamp_float_from_str(timestamp_string:str) -> float|None:
+    """Convert the given timestamp-string to a timestamp-float."""
+
+    try:
+        timestamp:float = float(timestamp_string)
+        return timestamp
+    except ValueError as _e:
+        return None
 
 def check_station_location(location_string:str) -> bool:
     """Check if a given location-string is valid accordingly to the ISO 6709 standard."""

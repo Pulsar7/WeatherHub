@@ -1,7 +1,6 @@
 from enum import Enum, auto
 from collections import namedtuple
 
-
 class ClientType(Enum):
     UNKNOWN = -1
     ADMIN_CLIENT = 0
@@ -13,6 +12,7 @@ class ClientPermission(Enum):
     UNKNOWN = -1
     NORMAL = 0
     ROOT = 1
+
 
 # Define a (Response)Code structure with named fields for clarity
 Code = namedtuple('Code', ['resp_code', 'description'])
@@ -50,7 +50,7 @@ Client_Command = namedtuple('Client_Command', ['allowed_client_types', 'client_p
 class ClientCommand(Enum):
     CREATE_USER = Client_Command((ClientType.ADMIN_CLIENT, ), ClientPermission.ROOT, "!#CreateUser#!",
                             ( ("<USERNAME>", "</USERNAME>"), ("<PASSWORD>", "</PASSWORD>"),
-                              ("<CLIENTTYPE>","</CLIENTTYPE>"), ("<CLIENTPERMISSION>", "</CLIENTPERMISSION>") ))
+                              ("<CLIENTTYPE>", "</CLIENTTYPE>"), ("<CLIENTPERMISSION>", "</CLIENTPERMISSION>") ))
 
     GET_CLIENT_COMMANDS = Client_Command((ClientType.ADMIN_CLIENT, ClientType.DATA_VISUALIZER), ClientPermission.NORMAL, "!#GetClientCommands#!", ())
 
@@ -63,7 +63,7 @@ class ClientCommand(Enum):
 
     SEND_WEATHER_REPORT_BY_STATION_NAME = Client_Command((ClientType.WEATHER_STATION, ), ClientPermission.NORMAL, "!#SendWeatherReportByStationName#!",
                             ( ("<WEATHER_STATION_NAME>", "</WEATHER_STATION_NAME>"),
-                              ("<TIMESTAMP>", "</TIMESTAMP>"), ("<CURRENT_TEMP_K>", "</CURRENT_TEMP_K>"), ("<CURRENT_WIND_SPEED_MPH>", "</CURRENT_WIND_SPEED_MPH>"),
+                              ("<TIMESTAMP>", "</TIMESTAMP>"), ("<CURRENT_TEMP_K>", "</CURRENT_TEMP_K>"), ("<CURRENT_WIND_SPEED_KPH>", "</CURRENT_WIND_SPEED_KPH>"),
                               ("<CURRENT_HUMIDITY_PERCENT>", "</CURRENT_HUMIDITY_PERCENT>") ))
 
     GET_ALL_USERS = Client_Command((ClientType.ADMIN_CLIENT, ), ClientPermission.ROOT, "!#GetAllUsers#!", ())
@@ -72,7 +72,7 @@ class ClientCommand(Enum):
                             ( ("<USERNAME>", "</USERNAME>"), ))
 
     DELETE_WEATHER_STATION_BY_STATION_NAME = Client_Command((ClientType.ADMIN_CLIENT, ), ClientPermission.ROOT, "!#DeleteWeatherStationByStationName#!",
-                            ( ("<STATION_NAME>","</STATION_NAME>"), ))
+                            ( ("<STATION_NAME>", "</STATION_NAME>"), ))
 
     GET_ALL_MY_STATIONS = Client_Command((ClientType.ADMIN_CLIENT, ), ClientPermission.NORMAL, "!#GetAllMyStations#!", ())
 
@@ -83,3 +83,12 @@ class ClientCommand(Enum):
 
     CLOSE_ALL_USER_CLIENT_CONNECTIONS_BY_USERNAME = Client_Command((ClientType.ADMIN_CLIENT, ), ClientPermission.ROOT, "!#CloseAllUserClientConnectionsByUsername#!",
                             ( ("<USERNAME>", "</USERNAME>"), ))
+
+    GET_ALL_MEASUREMENTS_BY_STATION_NAME = Client_Command((ClientType.ADMIN_CLIENT, ClientType.DATA_VISUALIZER), ClientPermission.NORMAL, "!#GetAllMeasurementsByStationName#!",
+                            ( ("<STATION_NAME>", "</STATION_NAME>"), ))
+
+    GET_ALL_MEASUREMENTS_BY_STATION_ID = Client_Command((ClientType.ADMIN_CLIENT, ClientType.DATA_VISUALIZER), ClientPermission.NORMAL, "!#GetAllMeasurementsByStationID#!",
+                            ( ("<STATION_ID>", ("</STATION_ID>")), ))
+
+    GET_STATION_INFORMATION_BY_STATION_ID = Client_Command((ClientType.ADMIN_CLIENT, ClientType.DATA_VISUALIZER), ClientPermission.NORMAL, "!#GetStationInformationByStationID#!",
+                            ( ("<STATION_ID>", "</STATION_ID>"), ))

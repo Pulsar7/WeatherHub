@@ -34,6 +34,7 @@ class Station(Base):
     __tablename__ = 'stations'
 
     id = Column(Integer, primary_key=True)
+    creation_timestamp = Column(Float, nullable=False, default=time.time())
     station_name = Column(String, nullable=False)
     station_location = Column(String, nullable=False)
 

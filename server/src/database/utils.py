@@ -1,7 +1,7 @@
 import bcrypt
 #
-from .models import User, Station
 from .database_manager import session
+from .models import User, Station, Measurement
 from src.constants import ClientType, ClientPermission
 
 
@@ -54,6 +54,26 @@ def create_new_station(user_id, station_name:str, station_location:str) -> Stati
     except Exception as _e:
         return None
 
+def add_measurement_to_station_by_station(station:Station, data:dict) -> tuple[bool, str|Measurement]:
+    """Add a new measurement to a station by its station-object."""
+
+    required_keys:list[str] = ["timestamp", "current_temperature_kelvin", "current_wind_speed_kph", "current_humidty_percent"]
+
+    if not station:
+        return (False, "Given station is None.")
+
+    for key in required_keys:
+        if key not in list(data.keys()):
+            return (False, f"The data-key '{key}' is missing.")
+
+    try:
+        new_measurement = Measurement(timestamp=data[0], current_temperature_kelvin=data[1], current_wind_speed_kph=data[2], current_humidity_percent=data[3], station_id=station.id)
+        session.add(new_measurement)
+        session.commit()
+        return (True, new_measurement)
+    except Exception as _e:
+        return (False, str(_e))
+
 def change_user_password(username:str, new_password:str) -> tuple[bool, str|None]:
     """Change an user-password."""
 
@@ -82,11 +102,22 @@ def get_station_by_name(station_name:str) -> Station|None:
 
     return session.query(Station).filter_by(station_name=station_name).first()
 
-def get_all_stations_by_user_id(user_id) -> list[Station]|None:
+def get_station_by_ID(station_id:int) -> Station|None:
+    """Fetch a station by their station-ID."""
+
+    return session.query(Station).filter_by(id=station_id).first()
+
+def get_all_stations_by_user_id(user_id:int) -> list[Station]|None:
     """Fetch all stations by their user_id."""
 
     stations = session.query(Station).filter_by(user_id=user_id).all()
     return stations if stations else None
+
+def get_all_measurements_of_station_by_station(station:Station) -> list[Measurement]|None:
+    """Fetch all measurements of a station by its station-object."""
+
+    measurements:list[Measurement]|None = session.query(Measurement).filter_by(station_id=station.id).all()
+    return measurements if measurements else None
 
 def delete_station(station:Station) -> bool:
     """Delete a station."""

@@ -13,6 +13,7 @@ from .constants import *
 from .client import Client
 from .custom_exceptions import *
 import src.database.utils as db_utils
+from src.database.models import User, Station, Measurement
 
 
 class Server:
@@ -546,7 +547,10 @@ class Server:
             ClientCommand.GET_ALL_MY_STATIONS: [self.handle_get_all_my_stations, False],
             ClientCommand.SHOW_ALL_CONNECTED_CLIENTS: [self.handle_show_all_connected_clients, False],
             ClientCommand.CHANGE_MY_PASSWORD: [self.handle_change_my_user_password, True],
-            ClientCommand.CLOSE_ALL_USER_CLIENT_CONNECTIONS_BY_USERNAME: [self.handle_close_all_user_client_connections_by_username, True]
+            ClientCommand.CLOSE_ALL_USER_CLIENT_CONNECTIONS_BY_USERNAME: [self.handle_close_all_user_client_connections_by_username, True],
+            ClientCommand.GET_ALL_MEASUREMENTS_BY_STATION_NAME: [self.handle_get_all_measurements_by_station_name, True],
+            ClientCommand.GET_ALL_MEASUREMENTS_BY_STATION_ID: [self.handle_get_all_measurements_by_station_id, True],
+            ClientCommand.GET_STATION_INFORMATION_BY_STATION_ID: [self.handle_get_station_information_by_station_id, True],
         }
 
         # Core command: Check for the CLOSE_CONNECTION command first
@@ -563,6 +567,149 @@ class Server:
         # If no valid command found, return an error or handle it accordingly
         # Shouldn't be reachable, because the command-validation was executed before this function.
         return (None, ResponseCode.UNKNOWN_COMMAND_ERROR)
+
+    def handle_get_station_information_by_station_id(self, client:Client, client_msg:str) -> tuple[str|None, ResponseCode]:
+        """Sending client all measurements from a specific station by its station-ID."""
+
+        command:ClientCommand = ClientCommand.GET_STATION_INFORMATION_BY_STATION_ID
+
+        logging.debug(f"{client.repr_str} Client wants to get information about a specific station by its station-ID.")
+
+        # Check if client is allowed to execute this command.
+        if not check_if_client_is_allowed_to_execute_client_command(client.client_type, client.permission, command):
+            # Client doesn't have sufficient permissions.
+            logging.debug(f"{client.repr_str} Clients has insufficient permissions to get information about a specific station by its station-ID.")
+            return (None, ResponseCode.NOT_ALLOWED_COMMAND_ERROR)
+
+        # Get arguments.
+        command_params:str = client_msg.split(command.value.command_str)[1]
+        station_ID_string:str = command_params.split(command.value.params[0][0])[1].split(command.value.params[0][1])[0]
+
+        if len(station_ID_string) == 0:
+            logging.debug(f"{client.repr_str} The given station-ID is empty.")
+            return ("The station-ID can't be empty.", ResponseCode.INVALID_ARGUMENTS_ERROR)
+
+        # Check if given station-ID is valid.
+        try:
+            station_ID:int = int(station_ID_string)
+        except ValueError as _e:
+            logging.debug(f"{client.repr_str} The given station-ID '{station_ID_string}' isn't a valid integer.")
+            return ("The given station-ID is invalid.", ResponseCode.INVALID_ARGUMENTS_ERROR)
+
+        station:Station|None = db_utils.get_station_by_ID(station_ID)
+
+        if not station:
+            logging.debug(f"{client.repr_str} There is no station with the station-ID '{station_ID}'")
+            return ("There is no station with such station-ID.", ResponseCode.INVALID_ARGUMENTS_ERROR)
+
+        resp_string:str = f"\n<--- Station-ID: {station.id} --->\n » Name: {station.station_name}\n » Creation-Timestamp: {station.creation_timestamp}\n » Location: {station.station_location}\n » Owner-Username: {station.user.username}{' (YOU)' if station.user.username == client.username else ''}\n"
+        logging.debug(f"{client.repr_str} Got {len(resp_string)} Bytes long station-information-string for client.")
+        return (resp_string, ResponseCode.NO_ERROR)
+
+    def handle_get_all_measurements_by_station_id(self, client:Client, client_msg:str) -> tuple[str|None, ResponseCode]:
+        """Sending client all measurements from a specific station by its station-ID."""
+
+        command:ClientCommand = ClientCommand.GET_ALL_MEASUREMENTS_BY_STATION_ID
+
+        logging.debug(f"{client.repr_str} Client wants to get all measurements from a specific station by its station-ID.")
+
+        # Check if client is allowed to execute this command.
+        if not check_if_client_is_allowed_to_execute_client_command(client.client_type, client.permission, command):
+            # Client doesn't have sufficient permissions.
+            logging.debug(f"{client.repr_str} Clients has insufficient permissions to get all measurements from a specific station by its station-ID.")
+            return (None, ResponseCode.NOT_ALLOWED_COMMAND_ERROR)
+
+        # Get arguments.
+        command_params:str = client_msg.split(command.value.command_str)[1]
+        station_ID_string:str = command_params.split(command.value.params[0][0])[1].split(command.value.params[0][1])[0]
+
+        if len(station_ID_string) == 0:
+            logging.debug(f"{client.repr_str} The given station-ID is empty.")
+            return ("The station-ID can't be empty.", ResponseCode.INVALID_ARGUMENTS_ERROR)
+
+        # Check if given station-ID is valid.
+        try:
+            station_ID:int = int(station_ID_string)
+        except ValueError as _e:
+            logging.debug(f"{client.repr_str} The given station-ID '{station_ID_string}' isn't a valid integer.")
+            return ("The given station-ID is invalid.", ResponseCode.INVALID_ARGUMENTS_ERROR)
+
+        station:Station|None = db_utils.get_station_by_ID(station_ID)
+
+        if not station:
+            logging.debug(f"{client.repr_str} There is no station with the station-ID '{station_ID}'")
+            return ("There is no station with such station-ID.", ResponseCode.INVALID_ARGUMENTS_ERROR)
+
+        # Get measurements.
+        measurements:list[Measurement]|None = db_utils.get_all_measurements_of_station_by_station(station)
+        if not measurements:
+            logging.debug(f"{client.repr_str} The station '{station.station_name}' (ID={station.id}) doesn't have any measurements stored.")
+            return (f"Couldn't find any measurements of the station '{station.station_name}' (ID={station.id}).", ResponseCode.NO_ERROR)
+
+        json_data:dict = {}
+        counter:int = 0
+        for measurement in measurements:
+            counter += 1
+            json_data[measurement.id] = {
+                'timestamp': measurement.timestamp,
+                'current_temperature_kelvin': measurement.current_temperature_kelvin,
+                'current_wind_speed_kph': measurement.current_wind_speed_kph,
+                'current_humidity_percent': measurement.current_humidity_percent
+            }
+
+        json_string:str = json.dump(json_data)
+        logging.debug(f"{client.repr_str} Found {counter} measurement{'s' if counter > 1 else ''} of the station '{station.station_name}' (ID={station.id})")
+        return (json_string, ResponseCode.NO_ERROR)
+
+    def handle_get_all_measurements_by_station_name(self, client:Client, client_msg:str) -> tuple[str|None, ResponseCode]:
+        """Sending client all measurements from a specific station by its station-name."""
+
+        command:ClientCommand = ClientCommand.GET_ALL_MEASUREMENTS_BY_STATION_NAME
+
+        logging.debug(f"{client.repr_str} Client wants to get all measurements from a specific station by its station-name.")
+
+        # Check if client is allowed to execute this command.
+        if not check_if_client_is_allowed_to_execute_client_command(client.client_type, client.permission, command):
+            # Client doesn't have sufficient permissions.
+            logging.debug(f"{client.repr_str} Clients has insufficient permissions to get all measurements from a specific station by its station-name.")
+            return (None, ResponseCode.NOT_ALLOWED_COMMAND_ERROR)
+
+        # Get arguments.
+        command_params:str = client_msg.split(command.value.command_str)[1]
+        station_name:str = command_params.split(command.value.params[0][0])[1].split(command.value.params[0][1])[0]
+
+        if len(station_name) == 0:
+            logging.debug(f"{client.repr_str} The given station-name is empty.")
+            return ("The station-name can't be empty.", ResponseCode.INVALID_ARGUMENTS_ERROR)
+
+        # Check if given station-name is valid.
+        station:Station|None = db_utils.get_station_by_name(station_name)
+
+        if not station:
+            logging.debug(f"{client.repr_str} The given station-name '{station_name}' is invalid.")
+
+            return (f"The given station-name is invalid.", ResponseCode.INVALID_ARGUMENTS_ERROR)
+
+        # Get measurements.
+        measurements:list[Measurement]|None = db_utils.get_all_measurements_of_station_by_station(station)
+        if not measurements:
+            logging.debug(f"{client.repr_str} The station '{station_name}' doesn't have any measurements stored.")
+            return (f"Couldn't find any measurements of the station '{station_name}'.", ResponseCode.NO_ERROR)
+
+        json_data:dict = {}
+        counter:int = 0
+        for measurement in measurements:
+            counter += 1
+            json_data[measurement.id] = {
+                'timestamp': measurement.timestamp,
+                'current_temperature_kelvin': measurement.current_temperature_kelvin,
+                'current_wind_speed_kph': measurement.current_wind_speed_kph,
+                'current_humidity_percent': measurement.current_humidity_percent
+            }
+
+        json_string:str = json.dump(json_data)
+        logging.debug(f"{client.repr_str} Found {counter} measurement{'s' if counter > 1 else ''} of the station '{station_name}'")
+        return (json_string, ResponseCode.NO_ERROR)
 
     def handle_close_all_user_client_connections_by_username(self, client:Client, client_msg:str) -> tuple[str|None, ResponseCode]:
         """Handle connection-closure of all user-clients by its username."""
@@ -603,7 +750,7 @@ class Server:
             resp_text += "There is no connection to close for the given username."
             return (resp_text, ResponseCode.NO_ERROR)
 
-        resp_text += f"Closing the connection to {len(clients_to_close_conn_to)} client(s)."
+        resp_text += f"Closing the connection to {len(clients_to_close_conn_to)} client{'s' if len(clients_to_close_conn_to) > 1 else ''}."
 
         for _client in clients_to_close_conn_to:
             self.close_client_connection(_client)
@@ -661,7 +808,8 @@ class Server:
             logging.debug(f"{client.repr_str} Clients has insufficient permissions to get information about all connected clients.")
             return (None, ResponseCode.NOT_ALLOWED_COMMAND_ERROR)
 
-        response_str:str = f"\n<--- There're {len(self._clients)} clients currently connected to the server --->\n"
+        len_of_clients:int = len(self._clients)
+        response_str:str = f"\n<--- There {'is' if len_of_clients == 1 else 'are'} {len_of_clients} client{'s' if len_of_clients > 1 else ''} currently connected to the server --->\n"
         for x, _client in enumerate(self._clients):
             response_str += f"{'(YOU) ' if client == _client else ''}« [{x+1}] » Address={_client.client_addr} \n| Username={_client.username} \n| Connection-Status={_client.connection_status} \n| Authentication-Status={_client.authentication_status} \n| Client-Type={_client.client_type} \n| Client-Permission={_client.permission}\n"
             if x < len(self._clients):
@@ -694,9 +842,7 @@ class Server:
             logging.debug(f"{client.repr_str} Couldn't find any weather-station of user '{user.username}'")
             return (f"Couldn't find any weather-station of user '{user.username}'", ResponseCode.NO_ERROR)
 
-        stations_information:str = f"\n<--- Found {len(stations)} weather-stations of user '{user.username}' --->\n"
-        for x, station in enumerate(stations):
-            stations_information += f"({x+1}) Station-ID: {station.id} » Station-Name: {station.station_name} » Station-Location: {station.station_location}\n"
+        stations_information:str = self.get_stations_information_string(stations, user.username)
 
         logging.debug(f"{client.repr_str} Fetched all of '{user.username}'s weather-stations.")
 
@@ -787,10 +933,10 @@ class Server:
         if not users:
             return ("Couldn't fetch any user from the database. Something went wrong.", ResponseCode.DATABASE_ERROR)
 
-        resp:str = f"\n<---{len(users)} Users--->\n"
+        resp:str = f"\n<--- {len(users)} User{'' if len(users) == 1 else 's'} --->\n"
 
         for x, user in enumerate(users):
-            resp += f"({x}) '{user.username}' » ID={user.id} » CLIENT-TYPE={user.client_type} » CLIENT-PERMISSION={user.client_permission} » CREATION-TIMESTAMP={user.creation_timestamp}\n"
+            resp += f"({x+1}) '{user.username}' » ID={user.id} » CLIENT-TYPE={user.client_type} » CLIENT-PERMISSION={user.client_permission} » CREATION-TIMESTAMP={user.creation_timestamp}\n"
 
         return (resp, ResponseCode.NO_ERROR)
 
@@ -807,7 +953,46 @@ class Server:
             logging.debug(f"{client.repr_str} Client has insufficient permissions to add a weather-report to a station by its station-name.")
             return (None, ResponseCode.NOT_ALLOWED_COMMAND_ERROR)
 
-        return ("This command is in development right now.", ResponseCode.SERVER_ERROR)
+        # Get arguments.
+        command_params:str = client_msg.split(command.value.command_str)[1]
+        station_name:str = command_params.split(command.value.params[0][0])[1].split(command.value.params[0][1])[0]
+        timestamp_string:str = command_params.split(command.value.params[1][0])[1].split(command.value.params[1][1])[0]
+        current_temp_k = command_params.split(command.value.params[2][0])[1].split(command.value.params[2][1])[0]
+        current_wind_speed_kph = command_params.split(command.value.params[3][0])[1].split(command.value.params[3][1])[0]
+        current_humidity_percent = command_params.split(command.value.params[4][0])[1].split(command.value.params[4][1])[0]
+
+        # Check if station with given station-name exists.
+        station:Station|None = db_utils.get_station_by_name(station_name)
+        if not station:
+            return (f"There is no station with the name '{station_name}'.", ResponseCode.INVALID_ARGUMENTS_ERROR)
+
+        # Check if given timestamp-string is valid and convert it to a float-timestamp.
+        float_timestamp:float|None = get_timestamp_float_from_str(timestamp_string)
+        if not float_timestamp:
+            return ("The given timestamp is invalid.", ResponseCode.INVALID_ARGUMENTS_ERROR)
+
+        # Check if current-temperature-in-kelvin is valid and convert it to a float.
+        float_current_temp_k:float|None = get_temp_float_from_str(current_temp_k)
+        if not float_current_temp_k:
+            return (f"The given current-temperature in Kelvin is invalid.", ResponseCode.INVALID_ARGUMENTS_ERROR)
+
+        # Check if current-wind-speed-kph is valid and convert it to a float.
+        float_current_wind_speed_kph:float|None = get_velocity_float_from_str(current_wind_speed_kph)
+        if not float_current_wind_speed_kph:
+            return (f"The given current-wind-speed in KPH is invalid.", ResponseCode.INVALID_ARGUMENTS_ERROR)
+
+        # Check if current-humidity-percent is valid and convert it to a float.
+        float_current_humidity_percent:float|None = get_percent_float_from_str(current_humidity_percent)
+        if not float_current_humidity_percent:
+            return (f"The given current-humdity in percent is invalid.", ResponseCode.INVLALID_ARGUMENTS_ERROR)
+
+        status, new_measurement_obj = db_utils.add_measurement_to_station_by_staion(station)
+        if not status:
+            logging.error(f"{client.repr_str} Couldn't add measurement to station (station_name='{station.station_name}') due to a database-error -> {new_measurement_obj}")
+            return (f"Couldn't add the measurement to station (name='{station.station_name}').", ResponseCode.DATABASE_ERROR)
+
+        logging.info(f"{client.repr_str} Client added a measurement to the station (station_name='{station.station_name}') with the ID={new_measurement_obj.id}")
+        return (f"Successfully added a new measurement to the station with the name '{station.station_name}'.", ResponseCode.NO_ERROR)
 
     def handle_get_registered_weather_stations_by_username_command(self, client:Client, client_msg:str) -> tuple[str|None, ResponseCode]:
         """Send client all registered weather-stations by username."""
@@ -835,16 +1020,25 @@ class Server:
         if not user:
             return (f"The user-username '{user_username}' does not exist.", ResponseCode.INVALID_ARGUMENTS_ERROR)
 
-        stations:list|None = db_utils.get_all_stations_by_user(user_id=user.id)
+        stations:list[Station]|None = db_utils.get_all_stations_by_user_id(user_id=user.id)
         if not stations:
             logging.debug(f"{client.repr_str} Couldn't find any weather-station of user '{user.username}'")
             return (f"Couldn't find any weather-station of user '{user.username}'", ResponseCode.NO_ERROR)
 
-        stations_information:str = f"\n<--- Found {len(stations)} weather-stations of user '{user.username}' --->\n"
+        stations_information:str = self.get_stations_information_string(stations, user.username)
+        logging.debug(f"{client.repr_str} Fetched {len(stations)} weather-stations of user '{user.username}'")
+
+        return (stations_information, ResponseCode.NO_ERROR)
+
+    def get_stations_information_string(self, stations:list[Station], username:str|None=None) -> str:
+        """Create a stations-information string for the client."""
+
+        stations_len:int = len(stations)
+        stations_information:str = f"""\n<--- Found {stations_len} weather-station{'' if stations_len == 1 else 's'}{f" of user '{username}'" if username else ""} --->\n"""
         for x, station in enumerate(stations):
             stations_information += f"({x+1}) Station-ID: {station.id} » Station-Name: {station.station_name} » Station-Location: {station.station_location}\n"
 
-        return (stations_information, ResponseCode.NO_ERROR)
+        return stations_information
 
     def handle_register_new_weather_station_command(self, client:Client, client_msg:str) -> tuple[str|None, ResponseCode]:
         """Handle new weather-station registration."""
