@@ -7,7 +7,6 @@ class ClientType(Enum):
     WEATHER_STATION = 1
     DATA_VISUALIZER = 2
 
-
 class ClientPermission(Enum):
     UNKNOWN = -1
     NORMAL = 0
@@ -64,7 +63,7 @@ class ClientCommand(Enum):
     SEND_WEATHER_REPORT_BY_STATION_NAME = Client_Command((ClientType.WEATHER_STATION, ), ClientPermission.NORMAL, "!#SendWeatherReportByStationName#!",
                             ( ("<WEATHER_STATION_NAME>", "</WEATHER_STATION_NAME>"),
                               ("<TIMESTAMP>", "</TIMESTAMP>"), ("<CURRENT_TEMP_K>", "</CURRENT_TEMP_K>"), ("<CURRENT_WIND_SPEED_KPH>", "</CURRENT_WIND_SPEED_KPH>"),
-                              ("<CURRENT_HUMIDITY_PERCENT>", "</CURRENT_HUMIDITY_PERCENT>") ))
+                              ("<CURRENT_HUMIDITY_PERCENT>", "</CURRENT_HUMIDITY_PERCENT>"), ("<CURRENT_PRESSURE_HPA>", "</CURRENT_PRESSURE_HPA>") ))
 
     GET_ALL_USERS = Client_Command((ClientType.ADMIN_CLIENT, ), ClientPermission.ROOT, "!#GetAllUsers#!", ())
 

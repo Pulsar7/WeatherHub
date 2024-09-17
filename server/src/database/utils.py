@@ -57,7 +57,7 @@ def create_new_station(user_id, station_name:str, station_location:str) -> Stati
 def add_measurement_to_station_by_station(station:Station, data:dict) -> tuple[bool, str|Measurement]:
     """Add a new measurement to a station by its station-object."""
 
-    required_keys:list[str] = ["timestamp", "current_temperature_kelvin", "current_wind_speed_kph", "current_humidty_percent"]
+    required_keys:list[str] = ["timestamp", "current_temperature_kelvin", "current_wind_speed_kph", "current_humidty_percent", "current_pressure_hpa"]
 
     if not station:
         return (False, "Given station is None.")
@@ -67,7 +67,7 @@ def add_measurement_to_station_by_station(station:Station, data:dict) -> tuple[b
             return (False, f"The data-key '{key}' is missing.")
 
     try:
-        new_measurement = Measurement(timestamp=data[0], current_temperature_kelvin=data[1], current_wind_speed_kph=data[2], current_humidity_percent=data[3], station_id=station.id)
+        new_measurement = Measurement(timestamp=data[0], current_temperature_kelvin=data[1], current_wind_speed_kph=data[2], current_humidity_percent=data[3], current_pressure_hpa=data[4], station_id=station.id)
         session.add(new_measurement)
         session.commit()
         return (True, new_measurement)

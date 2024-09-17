@@ -21,6 +21,8 @@ def get_velocity_float_from_str(velocity_string:str) -> float|None:
 
     try:
         velocity:float = float(velocity_string)
+        if velocity < 0:
+            return None
         return velocity
     except ValueError as _e:
         return None

@@ -60,6 +60,7 @@ class Measurement(Base):
     current_temperature_kelvin = Column(Float, nullable=False)
     current_wind_speed_kph = Column(Float, nullable=False)
     current_humidity_percent = Column(Float, nullable=False)
+    current_pressure_hpa = Column(Float, nullable=False)
 
     # Foreign key to reference the station
     station_id = Column(Integer, ForeignKey('stations.id', ondelete='CASCADE'), nullable=False)

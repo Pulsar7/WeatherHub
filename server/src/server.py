@@ -646,17 +646,7 @@ class Server:
             logging.debug(f"{client.repr_str} The station '{station.station_name}' (ID={station.id}) doesn't have any measurements stored.")
             return (f"Couldn't find any measurements of the station '{station.station_name}' (ID={station.id}).", ResponseCode.NO_ERROR)
 
-        json_data:dict = {}
-        counter:int = 0
-        for measurement in measurements:
-            counter += 1
-            json_data[measurement.id] = {
-                'timestamp': measurement.timestamp,
-                'current_temperature_kelvin': measurement.current_temperature_kelvin,
-                'current_wind_speed_kph': measurement.current_wind_speed_kph,
-                'current_humidity_percent': measurement.current_humidity_percent
-            }
-
+        counter, json_data = self.get_measurement_list_dict(measurements)
         json_string:str = json.dump(json_data)
         logging.debug(f"{client.repr_str} Found {counter} measurement{'s' if counter > 1 else ''} of the station '{station.station_name}' (ID={station.id})")
         return (json_string, ResponseCode.NO_ERROR)
@@ -696,6 +686,14 @@ class Server:
             logging.debug(f"{client.repr_str} The station '{station_name}' doesn't have any measurements stored.")
             return (f"Couldn't find any measurements of the station '{station_name}'.", ResponseCode.NO_ERROR)
 
+        counter, json_data = self.get_measurement_list_dict(measurements)
+        json_string:str = json.dump(json_data)
+        logging.debug(f"{client.repr_str} Found {counter} measurement{'s' if counter > 1 else ''} of the station '{station_name}'")
+        return (json_string, ResponseCode.NO_ERROR)
+
+    def get_measurement_list_dict(self, measurements:list[Measurement]) -> tuple[int, dict[str,float]]:
+        """Iterate a list of measurements and save them into a dictionary."""
+
         json_data:dict = {}
         counter:int = 0
         for measurement in measurements:
@@ -704,12 +702,11 @@ class Server:
                 'timestamp': measurement.timestamp,
                 'current_temperature_kelvin': measurement.current_temperature_kelvin,
                 'current_wind_speed_kph': measurement.current_wind_speed_kph,
-                'current_humidity_percent': measurement.current_humidity_percent
+                'current_humidity_percent': measurement.current_humidity_percent,
+                'current_pressure_hpa': measurement.current_pressure_hpa
             }
 
-        json_string:str = json.dump(json_data)
-        logging.debug(f"{client.repr_str} Found {counter} measurement{'s' if counter > 1 else ''} of the station '{station_name}'")
-        return (json_string, ResponseCode.NO_ERROR)
+        return (counter, json_data)
 
     def handle_close_all_user_client_connections_by_username(self, client:Client, client_msg:str) -> tuple[str|None, ResponseCode]:
         """Handle connection-closure of all user-clients by its username."""
@@ -753,9 +750,9 @@ class Server:
         resp_text += f"Closing the connection to {len(clients_to_close_conn_to)} client{'s' if len(clients_to_close_conn_to) > 1 else ''}."
 
         for _client in clients_to_close_conn_to:
-            self.close_client_connection(_client)
+            self.close_connection_to_client(_client)
 
-        return (resp_text, NO_ERROR)
+        return (resp_text, ResponseCode.NO_ERROR)
 
     def handle_change_my_user_password(self, client:Client, client_msg:str) -> tuple[str|None, ResponseCode]:
         """Handle user-password-change of current client-user."""
@@ -960,6 +957,7 @@ class Server:
         current_temp_k = command_params.split(command.value.params[2][0])[1].split(command.value.params[2][1])[0]
         current_wind_speed_kph = command_params.split(command.value.params[3][0])[1].split(command.value.params[3][1])[0]
         current_humidity_percent = command_params.split(command.value.params[4][0])[1].split(command.value.params[4][1])[0]
+        current_pressure_hpa = command_params.split(command.value.params[5][0])[1].split(command.value.params[5][1])[0]
 
         # Check if station with given station-name exists.
         station:Station|None = db_utils.get_station_by_name(station_name)
@@ -984,9 +982,22 @@ class Server:
         # Check if current-humidity-percent is valid and convert it to a float.
         float_current_humidity_percent:float|None = get_percent_float_from_str(current_humidity_percent)
         if not float_current_humidity_percent:
-            return (f"The given current-humdity in percent is invalid.", ResponseCode.INVLALID_ARGUMENTS_ERROR)
+            return (f"The given current-humdity in percent is invalid.", ResponseCode.INVALID_ARGUMENTS_ERROR)
 
-        status, new_measurement_obj = db_utils.add_measurement_to_station_by_staion(station)
+        # Check if current-pressure-hpa is valid and convert it to a float.
+        try:
+            float_current_pressure_hpa:float = float(current_pressure_hpa)
+        except ValueError as _e:
+            return (f"The given current-pressure in HPA is invalid.", ResponseCode.INVALID_ARGUMENTS_ERROR)
+
+        data:dict[str,float] = {
+            'timestamp': float_timestamp,
+            'current_temperature_kelvin': float_current_temp_k,
+            'current_wind_speed_kph': float_current_wind_speed_kph,
+            'current_humidty_percent': float_current_humidty_percent,
+            'current_pressure_hpa': float_current_pressure_hpa
+        }
+        status, new_measurement_obj = db_utils.add_measurement_to_station_by_staion(station, data)
         if not status:
             logging.error(f"{client.repr_str} Couldn't add measurement to station (station_name='{station.station_name}') due to a database-error -> {new_measurement_obj}")
             return (f"Couldn't add the measurement to station (name='{station.station_name}').", ResponseCode.DATABASE_ERROR)
