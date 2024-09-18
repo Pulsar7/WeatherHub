@@ -40,7 +40,7 @@ This client is for managing the different weather-stations and to get an overvie
 
 ### Usage
 
-You need to create an environment-file - `admin-client/.env`:
+You need to create an environment-file - `admin_client/.env`:
 
 ```
 TIMEZONE="UTC"
@@ -59,6 +59,42 @@ To connect to the server, execute the script like that:
 
 ```BASH
 python3 admin_client -s localhost -p 1337
+```
+
+## Weather-Station-Client
+
+This client sends weather-measurements to the server.
+
+
+### Usage
+
+You need to create an environment-file - `weather_station_client/.env`:
+
+```
+TIMEZONE="UTC"
+SERVER_HOST="localhost"
+SERVER_PORT=1337
+SERVER_CERTIFICATE_FILEPATH="ssl_files/certfile_server.crt"
+CLIENT_CERTIFICATE_FILEPATH="ssl_files/certfile_client.crt"
+CLIENT_KEYFILE_PATH="ssl_files/keyfile_client.key"
+CLIENT_KEYFILE_PASSWORD="lol1234"
+CLIENT_USERNAME="test_station_user"
+CLIENT_PASSWORD="lol1234"
+DEFAULT_MAX_MSG_CHUNK_SIZE=1024
+DEFAULT_BUFFER_SIZE=1024
+RESPONSECODE_SEPARATOR="_#R#_"
+LOG_DIRPATH="logs/"
+LOG_FILENAME="weather_station_client.log"
+WEATHER_STATION_NAME="Test Station"
+```
+
+As you can see, the weather-station-clients needs a `WEATHER_STATION_NAME` which is the actual name of the weather-station in the database.
+For that, the weather-station has to be registered in the database. You can do that with the `admin_client`.
+
+To execute the script, it can be done like that:
+
+```BASH
+python3 weather_station_client.py
 ```
 
 ## Key- & Certfile generation
