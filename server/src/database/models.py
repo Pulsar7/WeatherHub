@@ -34,7 +34,7 @@ class Station(Base):
     __tablename__ = 'stations'
 
     id = Column(Integer, primary_key=True)
-    creation_timestamp = Column(Float, nullable=False, default=time.time())
+    creation_timestamp = Column(Float, nullable=False, default=time.time)
     station_name = Column(String, nullable=False)
     station_location = Column(String, nullable=False)
 
@@ -56,7 +56,7 @@ class Measurement(Base):
     __tablename__ = 'measurements'
 
     id = Column(Integer, primary_key=True)
-    timestamp = Column(Float, nullable=False, default=time.time())
+    timestamp = Column(Float, nullable=False, default=time.time)
     current_temperature_kelvin = Column(Float, nullable=False)
     current_wind_speed_kph = Column(Float, nullable=False)
     current_humidity_percent = Column(Float, nullable=False)

@@ -8,6 +8,7 @@
 """
 import os
 import time
+import logging
 import argparse
 #
 from src.config import *
@@ -19,10 +20,10 @@ from src.logging_config import setup_logging
 def main() -> None:
     setup_logging(args.cli_output)
     start:float = time.time()
-    logger.info(f"Started at {start}")
+    logging.info(f"Started at {start}")
     client:Client = Client(config)
     client.run()
-    logger.info(f"Closed after {time.time()-start} seconds.")
+    logging.info(f"Closed after {time.time()-start} seconds.")
 
 
 if __name__ == '__main__':
@@ -42,7 +43,8 @@ if __name__ == '__main__':
         'client_password': CLIENT_PASSWORD,
         'default_max_msg_chunk_size': DEFAULT_MAX_MSG_CHUNK_SIZE,
         'default_buffer_size': DEFAULT_BUFFER_SIZE,
-        'responsecode_separator': RESPONSECODE_SEPARATOR
+        'responsecode_separator': RESPONSECODE_SEPARATOR,
+        'weather_station_name': WEATHER_STATION_NAME
     }
 
 

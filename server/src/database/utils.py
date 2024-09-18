@@ -37,6 +37,7 @@ def create_user(username:str, password:str, client_type:ClientType, client_permi
         session.add(new_user)
         session.commit()
     except Exception as _e:
+        session.rollback()  # Rollback in case of error
         return None
     return new_user
 
@@ -52,6 +53,7 @@ def create_new_station(user_id, station_name:str, station_location:str) -> Stati
         session.commit()
         return new_station
     except Exception as _e:
+        session.rollback()  # Rollback in case of error
         return None
 
 def add_measurement_to_station_by_station(station:Station, data:dict) -> tuple[bool, str|Measurement]:
@@ -65,13 +67,15 @@ def add_measurement_to_station_by_station(station:Station, data:dict) -> tuple[b
     for key in required_keys:
         if key not in list(data.keys()):
             return (False, f"The data-key '{key}' is missing.")
-
     try:
-        new_measurement = Measurement(timestamp=data[0], current_temperature_kelvin=data[1], current_wind_speed_kph=data[2], current_humidity_percent=data[3], current_pressure_hpa=data[4], station_id=station.id)
+        new_measurement = Measurement(timestamp=data[required_keys[0]], current_temperature_kelvin=data[required_keys[1]], current_wind_speed_kph=data[required_keys[2]],
+                            current_humidity_percent=data[required_keys[3]], current_pressure_hpa=data[required_keys[4]], station_id=station.id)
         session.add(new_measurement)
         session.commit()
         return (True, new_measurement)
     except Exception as _e:
+        print(f"SOMETHING WENT FUCKING WRONG! DATA={data} => {_e}")
+        session.rollback()  # Rollback in case of error
         return (False, str(_e))
 
 def change_user_password(username:str, new_password:str) -> tuple[bool, str|None]:
@@ -86,6 +90,7 @@ def change_user_password(username:str, new_password:str) -> tuple[bool, str|None
         session.commit()
         return (True, None)
     except Exception as _e:
+        session.rollback()  # Rollback in case of error
         return (False, str(_e))
 
 def get_all_users() -> list[User]:
@@ -130,6 +135,7 @@ def delete_station(station:Station) -> bool:
         session.commit()
         return True
     except Exception as _e:
+        session.rollback()  # Rollback in case of error
         return False
 
 def delete_user_by_user(user_to_delete:User) -> tuple[bool, str|None]:
@@ -141,4 +147,5 @@ def delete_user_by_user(user_to_delete:User) -> tuple[bool, str|None]:
         session.commit()  # This will trigger the cascade and delete stations
         return (True, None)
     except Exception as _e:
+        session.rollback()  # Rollback in case of error
         return (False, str(_e))

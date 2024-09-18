@@ -51,13 +51,13 @@ class ClientCommand(Enum):
                             ( ("<USERNAME>", "</USERNAME>"), ("<PASSWORD>", "</PASSWORD>"),
                               ("<CLIENTTYPE>", "</CLIENTTYPE>"), ("<CLIENTPERMISSION>", "</CLIENTPERMISSION>") ))
 
-    GET_CLIENT_COMMANDS = Client_Command((ClientType.ADMIN_CLIENT, ClientType.DATA_VISUALIZER), ClientPermission.NORMAL, "!#GetClientCommands#!", ())
+    GET_CLIENT_COMMANDS = Client_Command((ClientType.ADMIN_CLIENT, ClientType.DATA_VISUALIZER, ClientType.WEATHER_STATION), ClientPermission.NORMAL, "!#GetClientCommands#!", ())
 
     REGISTER_NEW_WEATHER_STATION = Client_Command((ClientType.ADMIN_CLIENT, ), ClientPermission.ROOT, "!#RegisterNewWeatherStation#!",
                             ( ("<USER_USERNAME>", "</USER_USERNAME>"), ("<STATION_NAME>", "</STATION_NAME>"),
                               ("<STATION_LOCATION>", "</STATION_LOCATION>") ))
 
-    GET_REGISTERED_WEATHER_STATIONS_BY_USERNAME = Client_Command((ClientType.ADMIN_CLIENT, ), ClientPermission.ROOT, "!#GetRegisteredWeatherStationsByUsername#!",
+    GET_WEATHER_STATIONS_BY_USERNAME = Client_Command((ClientType.ADMIN_CLIENT, ), ClientPermission.ROOT, "!#GetWeatherStationsByUsername#!",
                             ( ("<USER_USERNAME>", "</USER_USERNAME>"), ))
 
     SEND_WEATHER_REPORT_BY_STATION_NAME = Client_Command((ClientType.WEATHER_STATION, ), ClientPermission.NORMAL, "!#SendWeatherReportByStationName#!",

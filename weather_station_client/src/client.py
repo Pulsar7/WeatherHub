@@ -1,5 +1,6 @@
 import os
 import ssl
+import time
 import json
 import socket
 import logging
@@ -240,7 +241,7 @@ class Client:
     def establish_secure_connection(self) -> ssl.SSLSocket|None:
         """Establish a secure SSL/TLS-Connection to the server with the trusted certificate of the server."""
 
-        logging.info(f"Establishing connection to server {self.server_address}", progress=True)
+        logging.info(f"Establishing connection to server {self.server_address}")
 
         try:
             self.client_tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # IPv4-TCP
@@ -277,13 +278,41 @@ class Client:
         if self.connection_configuration():
             if self.pwd_authentication_process():
                 if self.get_client_commands():
-                    pass
+                    # Check if the client-user is allowed to send measurements to the server.
+                    if '!#SendWeatherReportByStationName#!' in list(self._client_commands.keys()):
+                        # Get weather-station-data
+                        status, data = self.get_measurement_data()
+                        if status:
+                            logging.info("Got the measurement data from the sensors.")
+                            # Sending measurement-report to server.
+                            command_str:str = "!#SendWeatherReportByStationName#!"
+                            params:tuple = self._client_commands[command_str]['params']
+                            keys:list = list(data.keys())
+                            response_for_server:str = command_str+params[0][0]+self._config['weather_station_name']+params[0][1]
+                            for i in range(1, len(params)):
+                                response_for_server += params[i][0]+data[keys[i-1]]+params[i][1]
+
+                            logging.info(f"Prepared the response-for-server-string: `{response_for_server}` ({len(response_for_server)} Bytes)")
+                            if self.send_msg(msg=response_for_server):
+                                status, (resp_msg, resp_code) = self.recv_msg()
+                                if status:
+                                    logging.info(f"Received a response from the server » ({resp_code.value.description}) {resp_msg}")
+                                else:
+                                    logging.error("Couldn't receive a response from the server.")
+                            else:
+                                logging.error("Couldn't send server the measurement-report.")
+                        else:
+                            logging.error("Couldn't fetch measurement-data from the sensors.")
+                    else:
+                        logging.error("This client seems to be misconfigured, because given user isn't allowed to send measurements.")
                 else:
                     logging.error("Couldn't get Client-Commands.")
             else:
                 logging.error("Cannot proceed without being authenticated.")
         else:
             logging.error("Connection configuration failed. Cannot proceed.")
+
+        # Close the connection.
 
         if self.send_msg(CoreCommand.CLOSE_CONNECTION.value.command_str):
             # Connection is still up and running
@@ -299,10 +328,24 @@ class Client:
         if self.client_ssl_socket:
             self.client_ssl_socket.close()
 
+    def get_measurement_data(self) -> tuple[bool, dict|None]:
+        """Fetch the measurement-data from each sensor."""
+
+        # ToDo: Implement sensor-logic.
+        # Simulate data for dev.
+        data:dict = {
+            'timestamp': str(time.time()),
+            'CURRENT_TEMP_K': str(10.5),
+            'CURRENT_WIND_SPEED_KPH': str(15.9),
+            'CURRENT_HUMIDITY_PERCENT': str(70.3),
+            'CURRENT_PRESSURE_HPA': str(1015.7)
+        }
+        return (True, data)
+
     def get_client_commands(self) -> bool:
         """Get Client-Commannds from server."""
 
-        logging.info(f"Getting client-commands from server", progress=True)
+        logging.info(f"Getting client-commands from server")
 
         if not self._connection_status:
             logging.error("Something went wrong. Cannot ask for client-commands via a closed connection.")
@@ -343,7 +386,7 @@ class Client:
         """Receive connection-configuration string and update buffer_size + max_chunk_size."""
 
         logging.info(f"Current & default connection configuration: buffer_size={self.buffer_size} | max_msg_chunk_size={self.max_msg_chunk_size}")
-        logging.info("Receiving connection-configuration-string from server", progress=True)
+        logging.info("Receiving connection-configuration-string from server")
 
         (status, response) = self.recv_msg()
         if not status:

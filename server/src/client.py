@@ -14,12 +14,18 @@ class Client:
         self._tcp_socket:socket.socket = client_socket
         self._ssl_socket:ssl.SSLSocket = ssl_socket
         self._client_addr:tuple[str,int] = client_addr
+        self._connection_timestamp:float = time.time()
         # Set to default-values
         self._client_type:ClientType = ClientType.UNKNOWN
         self._permission:ClientPermission = ClientPermission.UNKNOWN
         self._connection_status:bool = True
         self._authentication_status:bool = False
         self._username:str = ""
+
+    @property
+    def connection_timestamp(self) -> float:
+        """Return the timestamp when the client connected to the server."""
+        return self._connection_timestamp
 
     @property
     def tcp_socket(self) -> socket.socket:

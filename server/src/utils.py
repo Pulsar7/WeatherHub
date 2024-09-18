@@ -1,9 +1,16 @@
 import re
 import socket
 import string
+import datetime
 import ipaddress
 #
 from .constants import *
+
+def convert_timestamp_float_to_str_datetime(timestamp:float) -> str:
+    """Convert a float-timestamp to a datetime-string."""
+
+    dt_object = datetime.datetime.fromtimestamp(timestamp)
+    return dt_object.strftime("%Y-%m-%d %H:%M:%S.%f")
 
 def get_percent_float_from_str(percent_string:str) -> float|None:
     """Convert the given percent-string to a float."""
