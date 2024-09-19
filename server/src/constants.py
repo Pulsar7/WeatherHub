@@ -33,6 +33,7 @@ class ResponseCode(Enum):
 class MessageFlag(Enum):
     BEGIN_BUFFERING = "!~BEGINBUFFERING~!"
     END_BUFFERING = "!~ENDBUFFERING~!"
+    JSON_DATA = "!~JSONDATA~!"
 
 # Define a CoreCommand structure with named fields for clarity.
 Core_Command = namedtuple('Core_Command', ['client_permission', 'command_str', 'params'])

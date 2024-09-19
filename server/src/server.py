@@ -647,7 +647,7 @@ class Server:
             return (f"Couldn't find any measurements of the station '{station.station_name}' (ID={station.id}).", ResponseCode.NO_ERROR)
 
         counter, json_data = self.get_measurement_list_dict(measurements)
-        json_string:str = json.dumps(json_data)
+        json_string:str = MessageFlag.JSON_DATA.value + json.dumps(json_data)
         logging.debug(f"{client.repr_str} Found {counter} measurement{'s' if counter > 1 else ''} of the station '{station.station_name}' (ID={station.id})")
         return (json_string, ResponseCode.NO_ERROR)
 
@@ -687,7 +687,7 @@ class Server:
             return (f"Couldn't find any measurements of the station '{station_name}'.", ResponseCode.NO_ERROR)
 
         counter, json_data = self.get_measurement_list_dict(measurements)
-        json_string:str = json.dumps(json_data)
+        json_string:str = MessageFlag.JSON_DATA.value + json.dumps(json_data)
         logging.debug(f"{client.repr_str} Found {counter} measurement{'s' if counter > 1 else ''} of the station '{station_name}'")
         return (json_string, ResponseCode.NO_ERROR)
 
@@ -1147,7 +1147,7 @@ class Server:
 
             help_dict[client_command.value.command_str] = {'params':client_command.value.params}
 
-        help_string:str = json.dumps(help_dict)
+        help_string:str = MessageFlag.JSON_DATA.value + json.dumps(help_dict)
 
         logging.info(f"{client.repr_str} Got help-string for client ({len(help_string)} Bytes)")
 

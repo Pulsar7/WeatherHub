@@ -22,7 +22,7 @@ class ResponseCode(Enum):
 class MessageFlag(Enum):
     BEGIN_BUFFERING = "!~BEGINBUFFERING~!"
     END_BUFFERING = "!~ENDBUFFERING~!"
-
+    JSON_DATA = "!~JSONDATA~!"
 
 # Define a Command structure with named fields for clarity
 Command = namedtuple('Command', ['command_str', 'params'])

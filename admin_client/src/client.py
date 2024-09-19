@@ -312,7 +312,11 @@ class Client:
                                 self.logger.error("Couldn't receive a response from the server!")
                                 continue
 
-                            self.logger.info(f"<SERVER> ({resp_code.value.description}) {resp_msg}")
+                            if MessageFlag.JSON_DATA.value not in resp_msg:
+                                self.logger.info(f"<SERVER> ({resp_code.value.description}) {resp_msg}")
+                            else:
+                                self.logger.info(f"<SERVER> ({resp_code.value.description})")
+                                Console().print(resp_msg.split(MessageFlag.JSON_DATA.value)[1])
 
                             if resp_msg == CoreCommand.CLOSE_CONNECTION.value.command_str:
                                 # Server wants to close connection.
@@ -421,7 +425,7 @@ class Client:
 
         # Get help-dicitionary.
         try:
-            help_string:str = response[0]
+            help_string:str = response[0].split(MessageFlag.JSON_DATA.value)[1]
             help_dict:dict = json.loads(help_string)
             self._client_commands = help_dict
             self.logger.info(f"Received {len(self._client_commands.keys())} client-commands.")
