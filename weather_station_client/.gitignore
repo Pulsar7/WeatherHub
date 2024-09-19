@@ -4,4 +4,4 @@
 *.key
 *.csr
 *.crt
-*.log
+*log*
