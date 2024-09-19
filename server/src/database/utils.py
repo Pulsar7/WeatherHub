@@ -112,6 +112,11 @@ def get_station_by_ID(station_id:int) -> Station|None:
 
     return session.query(Station).filter_by(id=station_id).first()
 
+def get_measurement_by_ID(measurement_id:int) -> Measurement|None:
+    """Fetch a measurement by their measurement-ID."""
+
+    return session.query(Measurement).filter_by(id=measurement_id).first()
+
 def get_all_stations_by_user_id(user_id:int) -> list[Station]|None:
     """Fetch all stations by their user_id."""
 
@@ -123,6 +128,20 @@ def get_all_measurements_of_station_by_station(station:Station) -> list[Measurem
 
     measurements:list[Measurement]|None = session.query(Measurement).filter_by(station_id=station.id).all()
     return measurements if measurements else None
+
+def delete_measurement(measurement:Measurement) -> tuple[bool, str|None]:
+    """Delete a measurement."""
+
+    if not isinstance(measurement, Measurement):
+        return (False, "TypeError")
+
+    try:
+        session.delete(measurement)
+        session.commit()
+        return (True, None)
+    except Exception as _e:
+        session.rollback()
+        return (False, str(_e))
 
 def delete_station(station:Station) -> tuple[bool, str|None]:
     """Delete a station."""

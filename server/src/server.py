@@ -551,6 +551,7 @@ class Server:
             ClientCommand.GET_ALL_MEASUREMENTS_BY_STATION_NAME: [self.handle_get_all_measurements_by_station_name, True],
             ClientCommand.GET_ALL_MEASUREMENTS_BY_STATION_ID: [self.handle_get_all_measurements_by_station_id, True],
             ClientCommand.GET_STATION_INFORMATION_BY_STATION_ID: [self.handle_get_station_information_by_station_id, True],
+            ClientCommand.DELETE_WEATHER_MEASUREMENT_BY_MEASUREMENT_ID: [self.handle_delete_measurement_by_measurement_id, True],
         }
 
         # Core command: Check for the CLOSE_CONNECTION command first
@@ -567,6 +568,66 @@ class Server:
         # If no valid command found, return an error or handle it accordingly
         # Shouldn't be reachable, because the command-validation was executed before this function.
         return (None, ResponseCode.UNKNOWN_COMMAND_ERROR)
+
+    def handle_delete_measurement_by_measurement_id(self, client:Client, client_msg:str) -> tuple[str|None, ResponseCode]:
+        """Handling a measurement-deletion by its measurement-id."""
+        """
+            1. Check if measurement-ID is valid.
+            2. Check if client is allowed to execute this command.
+               If client.username is not the same as the measurement.station.user.username, check if user has root-permission.
+        """
+
+        command:ClientCommand = ClientCommand.DELETE_WEATHER_MEASUREMENT_BY_MEASUREMENT_ID
+
+        logging.debug(f"{client.repr_str} Client wants to delete a measurement by its measurement-ID.")
+
+        # Check if client is allowed to execute this command.
+        if not check_if_client_is_allowed_to_execute_client_command(client.client_type, client.permission, command):
+            # Client doesn't have sufficient permissions.
+            logging.debug(f"{client.repr_str} Clients has insufficient permissions to delete a measurement by its measurement-ID.")
+            return (None, ResponseCode.NOT_ALLOWED_COMMAND_ERROR)
+
+        # Get arguments.
+        command_params:str = client_msg.split(command.value.command_str)[1]
+        measurement_ID_string:str = command_params.split(command.value.params[0][0])[1].split(command.value.params[0][1])[0]
+
+        # Check if measurement-ID is valid.
+        if len(measurement_ID_string) == 0:
+            logging.debug(f"{client.repr_str} The given measurement-ID is empty.")
+            return ("The measurement-ID can't be empty.", ResponseCode.INVALID_ARGUMENTS_ERROR)
+
+        try:
+            measurement_ID:int = int(measurement_ID_string)
+        except ValueError as _e:
+            logging.debug(f"{client.repr_str} The given measurement-ID is invalid.")
+            return ("The given measurement-ID is invalid.", ResponseCode.INVALID_ARGUMENTS_ERROR)
+
+        measurement:Measurement|None = db_utils.get_measurement_by_ID(measurement_ID)
+        if not measurement:
+            logging.debug(f"{client.repr_str} There is no measurement with the given measurement-ID.")
+            return ("There is no such measurement.", ResponseCode.INVALID_ARGUMENTS_ERROR)
+
+        # Check if client is allowed to delete the measurement.
+        if measurement.station.user.username != client.username:
+            # Client-User is not the owner of the weather-station.
+            if client.permission != ClientPermission.ROOT:
+                # Client-User has no ROOT-Permissions.
+                logging.debug(f"{client.repr_str} Client is not the owner of the weather-station. The owner is '{measurement.station.user.username}'")
+                return (None, ResponseCode.NOT_ALLOWED_COMMAND_ERROR)
+            else:
+                logging.debug(f"{client.repr_str} Client is not the owner of the weather station ('{measurement.station.user.username}' is), however, the client-user has ROOT-Permission.")
+
+        # Delete measurement.
+        owner_username:str = measurement.station.user.username
+        station_name:str = measurement.station.station_name
+        status, db_resp = db_utils.delete_measurement(measurement)
+        if not status:
+            logging.error(f"{client.repr_str} Couldn't delete measurement by ID '{measurement.id}'. Database-Error -> {db_resp}")
+            return ("Couldn't delete measurement, because of a database-error.", ResponseCode.DATABASE_ERROR)
+
+        logging.info(f"{client.repr_str} Deleted a measurement by its ID '{measurement_ID}' ~ owner-username={owner_username} ~ station-name={station_name}")
+        return (f"Deleted a measurement by its ID '{measurement_ID}'", ResponseCode.NO_ERROR)
+
 
     def handle_get_station_information_by_station_id(self, client:Client, client_msg:str) -> tuple[str|None, ResponseCode]:
         """Sending client all measurements from a specific station by its station-ID."""
@@ -585,6 +646,7 @@ class Server:
         command_params:str = client_msg.split(command.value.command_str)[1]
         station_ID_string:str = command_params.split(command.value.params[0][0])[1].split(command.value.params[0][1])[0]
 
+        # Check if station-ID is valid.
         if len(station_ID_string) == 0:
             logging.debug(f"{client.repr_str} The given station-ID is empty.")
             return ("The station-ID can't be empty.", ResponseCode.INVALID_ARGUMENTS_ERROR)

@@ -92,3 +92,6 @@ class ClientCommand(Enum):
 
     GET_STATION_INFORMATION_BY_STATION_ID = Client_Command((ClientType.ADMIN_CLIENT, ClientType.DATA_VISUALIZER), ClientPermission.NORMAL, "!#GetStationInformationByStationID#!",
                             ( ("<STATION_ID>", "</STATION_ID>"), ))
+
+    DELETE_WEATHER_MEASUREMENT_BY_MEASUREMENT_ID = Client_Command((ClientType.ADMIN_CLIENT, ), ClientPermission.NORMAL, "!#DeleteWeatherMeasurementByMeasurementID#!",
+                            ( ("<MEASUREMENT_ID>", "</MEASUREMENT_ID>"), ))

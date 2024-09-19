@@ -372,7 +372,7 @@ class Client:
 
         # Get help-dicitionary.
         try:
-            help_string:str = response[0]
+            help_string:str = response[0].split(MessageFlag.JSON_DATA.value)[1]
             help_dict:dict = json.loads(help_string)
             self._client_commands = help_dict
             logging.info(f"Received {len(self._client_commands.keys())} client-commands.")
