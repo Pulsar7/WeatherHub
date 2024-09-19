@@ -124,19 +124,19 @@ def get_all_measurements_of_station_by_station(station:Station) -> list[Measurem
     measurements:list[Measurement]|None = session.query(Measurement).filter_by(station_id=station.id).all()
     return measurements if measurements else None
 
-def delete_station(station:Station) -> bool:
+def delete_station(station:Station) -> tuple[bool, str|None]:
     """Delete a station."""
 
     if not isinstance(station, Station):
-        return False
+        return (False, "TypeError")
 
     try:
         session.delete(station)
         session.commit()
-        return True
+        return (True, None)
     except Exception as _e:
         session.rollback()  # Rollback in case of error
-        return False
+        return (False, str(_e))
 
 def delete_user_by_user(user_to_delete:User) -> tuple[bool, str|None]:
     """Delete a user by its user-object."""

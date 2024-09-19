@@ -677,7 +677,6 @@ class Server:
 
         if not station:
             logging.debug(f"{client.repr_str} The given station-name '{station_name}' is invalid.")
-
             return (f"The given station-name is invalid.", ResponseCode.INVALID_ARGUMENTS_ERROR)
 
         # Get measurements.
@@ -727,10 +726,12 @@ class Server:
 
         # Check if given username is valid.
         if len(username) == 0:
-            return ("The password can't be empty!", ResponseCode.INVALID_ARGUMENTS_ERROR)
+            logging.debug(f"{client.repr_str} The given username is empty.")
+            return ("The username can't be empty!", ResponseCode.INVALID_ARGUMENTS_ERROR)
 
         user:User|None = db_utils.get_user_by_username(username)
         if not user:
+            logging.debug(f"{client.repr_str} The given username is invalid.")
             return (f"The given username is invalid.", ResponseCode.INVALID_ARGUMENTS_ERROR)
 
         clients_to_close_conn_to:list[Client] = []
@@ -741,10 +742,11 @@ class Server:
             if _client.username == user.username:
                 if _client == client:
                     continue
-                clients_to_close_conn_to.append(_client)
+            clients_to_close_conn_to.append(_client)
 
         if len(clients_to_close_conn_to) == 0:
-            resp_text += "There is no connection to close for the given username."
+            resp_text += "There is no connection to close with the given username."
+            logging.debug(f"{client.repr_str} There is no connection to close with the given username.")
             return (resp_text, ResponseCode.NO_ERROR)
 
         resp_text += f"Closing the connection to {len(clients_to_close_conn_to)} client{'s' if len(clients_to_close_conn_to) > 1 else ''}."
@@ -752,6 +754,7 @@ class Server:
         for _client in clients_to_close_conn_to:
             self.close_connection_to_client(_client)
 
+        logging.debug(f"{client.repr_str} Closed all client-connections, who're connected with the username '{user.username}'")
         return (resp_text, ResponseCode.NO_ERROR)
 
     def handle_change_my_user_password(self, client:Client, client_msg:str) -> tuple[str|None, ResponseCode]:
@@ -781,6 +784,7 @@ class Server:
             return (f"It seems like your client-username is invalid. Please report this error.", ResponseCode.SERVER_ERROR) # or ResponseCode.DATABASE_ERROR
 
         if db_utils.verify_password(user.password, new_password):
+            logging.debug(f"{client.repr_str} The given password equals the old one. Nothing to change.")
             return (f"Your new password equals the old one. Nothing to change.", ResponseCode.INVALID_ARGUMENTS_ERROR)
 
         status, resp_text = db_utils.change_user_password(client.username, new_password)
@@ -789,7 +793,6 @@ class Server:
             return (f"Couldn't change your user-password.", ResponseCode.DATABASE_ERROR)
 
         logging.info(f"{client.repr_str} Client changed its user-password. Forcing client to re-connect.")
-
         return (f"Your password has been changed successfully. Please re-authenticate.", ResponseCode.FORCE_CONNECTION_CLOSURE)
 
     def handle_show_all_connected_clients(self, client:Client) -> tuple[str|None, ResponseCode]:
@@ -842,7 +845,6 @@ class Server:
         stations_information:str = self.get_stations_information_string(stations, user.username)
 
         logging.debug(f"{client.repr_str} Fetched all of '{user.username}'s weather-stations.")
-
         return (stations_information, ResponseCode.NO_ERROR)
 
     def handle_delete_weather_station_by_station_name(self, client:Client, client_msg:str) -> tuple[str|None, ResponseCode]:
@@ -864,18 +866,21 @@ class Server:
 
         # Check if given station-name is valid.
         if len(station_name) == 0:
+            logging.debug(f"{client.repr_str} The given station-name is empty.")
             return ("The station-name can't be empty!", ResponseCode.INVALID_ARGUMENTS_ERROR)
 
         station = db_utils.get_station_by_name(station_name)
 
         if not station:
+            logging.debug(f"{client.repr_str} The given station-name is invalid.")
             return (f"There is no station with the station-name '{station_name}'.", ResponseCode.INVALID_ARGUMENTS_ERROR)
 
-        if not db_utils.delete_station(station):
+        status, error_resp = db_utils.delete_station(station)
+        if not status:
+            logging.error(f"{client.repr_str} Couldn't delete station by its station-name. Database-Error -> {error_resp}")
             return (f"Couldn't delete station by its station-name '{station_name}'. Database-Error.", ResponseCode.DATABASE_ERROR)
 
         logging.info(f"{client.repr_str} Client deleted a station by its station-name '{station_name}'.")
-
         return (f"Deleted a weather-station by its station-name '{station_name}'.", ResponseCode.NO_ERROR)
 
     def handle_delete_user_by_username_command(self, client:Client, client_msg:str) -> tuple[str|None, ResponseCode]:
@@ -897,11 +902,13 @@ class Server:
 
         # Check if given username is valid.
         if len(username) == 0:
+            logging.debug(f"{client.repr_str} The given username is empty.")
             return ("The username can't be empty!", ResponseCode.INVALID_ARGUMENTS_ERROR)
 
         user:User|None = db_utils.get_user_by_username(username)
 
         if not user:
+            logging.debug(f"{client.repr_str} The given username does not exist.")
             return (f"The given username '{username}' does not exist!", ResponseCode.INVALID_ARGUMENTS_ERROR)
 
         status, resp_text = db_utils.delete_user_by_user(user)
@@ -928,6 +935,7 @@ class Server:
 
         users:list|None = db_utils.get_all_users()
         if not users:
+            logging.error(f"{client.repr_str} Couldn't fetch any user from the database. Database-Error?")
             return ("Couldn't fetch any user from the database. Something went wrong.", ResponseCode.DATABASE_ERROR)
 
         resp:str = f"\n<--- {len(users)} User{'' if len(users) == 1 else 's'} --->\n"
