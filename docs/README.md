@@ -2,6 +2,8 @@
 
 A small project to gather weather data from several weather stations, which are connected to a centralized server.
 
+**Attention**: This project is still in development.
+
 ## Server
 
 The server handles all client-types of this project. It receives and stores measurements of weather-stations in a database. In addition to that, the server then also sends the saved data to 
