@@ -542,7 +542,7 @@ class Server:
             ClientCommand.REGISTER_NEW_WEATHER_STATION: [self.handle_register_new_weather_station_command, True],
             ClientCommand.GET_WEATHER_STATIONS_BY_USERNAME: [self.handle_get_weather_stations_by_username_command, True],
             ClientCommand.SEND_WEATHER_REPORT_BY_STATION_NAME: [self.handle_add_weather_report_by_station_name_command, True],
-            ClientCommand.DELETE_USER_BY_USERNAME: [self.handle_get_all_users_command, False],
+            ClientCommand.DELETE_USER_BY_USERNAME: [self.handle_delete_user_by_username_command, True],
             ClientCommand.DELETE_WEATHER_STATION_BY_STATION_NAME: [self.handle_delete_weather_station_by_station_name, True],
             ClientCommand.GET_ALL_MY_STATIONS: [self.handle_get_all_my_stations, False],
             ClientCommand.SHOW_ALL_CONNECTED_CLIENTS: [self.handle_show_all_connected_clients, False],
@@ -615,7 +615,7 @@ class Server:
                 logging.debug(f"{client.repr_str} Client is not the owner of the weather-station. The owner is '{measurement.station.user.username}'")
                 return (None, ResponseCode.NOT_ALLOWED_COMMAND_ERROR)
             else:
-                logging.debug(f"{client.repr_str} Client is not the owner of the weather station ('{measurement.station.user.username}' is), however, the client-user has ROOT-Permission.")
+                logging.debug(f"{client.repr_str} Client is not the owner of the weather station '{station.station_name}' ('{measurement.station.user.username}' is the owner), however, the client-user has ROOT-Permission.")
 
         # Delete measurement.
         owner_username:str = measurement.station.user.username
@@ -709,9 +709,10 @@ class Server:
             return (f"Couldn't find any measurements of the station '{station.station_name}' (ID={station.id}).", ResponseCode.NO_ERROR)
 
         counter, json_data = self.get_measurement_list_dict(measurements)
-        json_string:str = MessageFlag.JSON_DATA.value + json.dumps(json_data)
-        logging.debug(f"{client.repr_str} Found {counter} measurement{'s' if counter > 1 else ''} of the station '{station.station_name}' (ID={station.id})")
-        return (json_string, ResponseCode.NO_ERROR)
+        resp_msg_text:str = f"Found {counter} measurement{'s' if counter > 1 else ''} of the station '{station.station_name}' (ID={station.id})"
+        logging.debug(f"{client.repr_str} {resp_msg_text}")
+        msg_string:str = resp_msg_text + MessageFlag.JSON_DATA.value + json.dumps(json_data)
+        return (msg_string, ResponseCode.NO_ERROR)
 
     def handle_get_all_measurements_by_station_name(self, client:Client, client_msg:str) -> tuple[str|None, ResponseCode]:
         """Sending client all measurements from a specific station by its station-name."""
@@ -748,9 +749,10 @@ class Server:
             return (f"Couldn't find any measurements of the station '{station_name}'.", ResponseCode.NO_ERROR)
 
         counter, json_data = self.get_measurement_list_dict(measurements)
-        json_string:str = MessageFlag.JSON_DATA.value + json.dumps(json_data)
-        logging.debug(f"{client.repr_str} Found {counter} measurement{'s' if counter > 1 else ''} of the station '{station_name}'")
-        return (json_string, ResponseCode.NO_ERROR)
+        resp_msg_text:str = f"Found {counter} measurement{'s' if counter > 1 else ''} of the station '{station.station_name}'"
+        msg_string:str = resp_msg_text + MessageFlag.JSON_DATA.value + json.dumps(json_data)
+        logging.debug(f"{client.repr_str} {resp_msg_text}")
+        return (msg_string, ResponseCode.NO_ERROR)
 
     def get_measurement_list_dict(self, measurements:list[Measurement]) -> tuple[int, dict[str,float]]:
         """Iterate a list of measurements and save them into a dictionary."""
@@ -979,7 +981,25 @@ class Server:
             return (f"Couldn't delete the user, because of a database-error.", ResponseCode.DATABASE_ERROR)
 
         logging.info(f"{client.repr_str} Client deleted the user with the username '{username}'.")
-        return (f"Successfully deleted the user '{username}'.", ResponseCode.NO_ERROR)
+
+        # Close connection to every client, which is authenticated as the given user.
+        conns_to_close:list[Client] = []
+        for _client in self._clients:
+            if _client == client:
+                continue
+            if _client.username == username:
+                conns_to_close.append(_client)
+
+        list_len:int = len(conns_to_close)
+        logging.debug(f"{client.repr_str} [Deleted a user] There {'are' if list_len != 1 else 'is'} {list_len} connection{'s' if list_len != 1 else ''} to close")
+        for conn in conns_to_close:
+            self.close_connection_to_client(conn)
+
+        if client.username == username:
+            logging.info(f"{client.repr_str} Client deleted the username, the client is currently authenticated with. Forcing client to close its connection.")
+            return (f"Successfully deleted the user '{username}'. You're currently authenticated with given username. Please reconnect.", ResponseCode.FORCE_CONNECTION_CLOSURE)
+
+        return (f"Successfully deleted the user '{username}' and closed {list_len} connection{'s' if list_len != 1 else ''}.", ResponseCode.NO_ERROR)
 
 
     def handle_get_all_users_command(self, client:Client) -> tuple[str|None, ResponseCode]:
