@@ -1304,18 +1304,19 @@ class Server:
             logging.error(f"{client.repr_str} Couldn't send CLOSE_CONNECTION-command to client. Connection could be closed already.")
 
         try:
-            if client.authentication_status:
-                client.authentication_status = False
+            client.authentication_status = False
             client.connection_status = False
 
             if client.ssl_socket:
                 try:
+                    # Step 1: Shutdown SSL/TLS-layer properly by exchanging close_notify
                     client.ssl_socket.shutdown(socket.SHUT_RDWR) # Shutdown SSL layer
                 except (socket.error, OSError) as ssl_e:
                     logging.warning(f"{client.repr_str} Could not shut down SSL socket: {ssl_e}")
 
             if client.tcp_socket:
                 try:
+                    # Step 2: Shutdown TCP-layer after SSL/TLS shutdown is complete.
                     client.tcp_socket.shutdown(socket.SHUT_RDWR) # Shutdown TCP layer
                 except (socket.error, OSError) as tcp_e:
                     logging.warning(f"{client.repr_str} Could not shut down TCP socket: {tcp_e}")

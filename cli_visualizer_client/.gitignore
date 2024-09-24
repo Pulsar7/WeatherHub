@@ -1,0 +1,7 @@
+*.env
+*.swp
+*__pycache__*
+*.key
+*.csr
+*.crt
+*.pyc

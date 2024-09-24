@@ -1,0 +1,359 @@
+2024-09-18T19:58:49Z [INFO] [MainThread] logging_config: Logging is set up and using ISO 8601 format with UTC time.
+2024-09-18T19:59:16Z [INFO] [MainThread] logging_config: Logging is set up and using ISO 8601 format with UTC time.
+2024-09-18T19:59:16Z [INFO] [MainThread] weather_station_client: Started at 1726689556.3458936
+2024-09-18T19:59:16Z [INFO] [MainThread] client: Client is running.
+2024-09-18T19:59:35Z [INFO] [MainThread] logging_config: Logging is set up and using ISO 8601 format with UTC time.
+2024-09-18T19:59:35Z [INFO] [MainThread] weather_station_client: Started at 1726689575.7642496
+2024-09-18T19:59:35Z [INFO] [MainThread] client: Client is running.
+2024-09-18T19:59:35Z [INFO] [MainThread] client: Establishing connection to server ('localhost', 1337)
+2024-09-18T19:59:35Z [INFO] [MainThread] client: SSL established. Peer: {'subject': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'issuer': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'version': 1, 'serialNumber': '4BED22886654271F9A9CD5B410041B5EA3229BCD', 'notBefore': 'Sep 13 10:39:04 2024 GMT', 'notAfter': 'Sep 13 10:39:04 2025 GMT'}
+2024-09-18T19:59:35Z [INFO] [MainThread] client: Current & default connection configuration: buffer_size=1024 | max_msg_chunk_size=1024
+2024-09-18T19:59:38Z [INFO] [MainThread] logging_config: Logging is set up and using ISO 8601 format with UTC time.
+2024-09-18T19:59:38Z [INFO] [MainThread] weather_station_client: Started at 1726689578.0145915
+2024-09-18T19:59:38Z [INFO] [MainThread] client: Client is running.
+2024-09-18T19:59:38Z [INFO] [MainThread] client: Establishing connection to server ('localhost', 1337)
+2024-09-18T19:59:38Z [INFO] [MainThread] client: SSL established. Peer: {'subject': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'issuer': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'version': 1, 'serialNumber': '4BED22886654271F9A9CD5B410041B5EA3229BCD', 'notBefore': 'Sep 13 10:39:04 2024 GMT', 'notAfter': 'Sep 13 10:39:04 2025 GMT'}
+2024-09-18T19:59:38Z [INFO] [MainThread] client: Current & default connection configuration: buffer_size=1024 | max_msg_chunk_size=1024
+2024-09-18T20:00:00Z [INFO] [MainThread] logging_config: Logging is set up and using ISO 8601 format with UTC time.
+2024-09-18T20:00:00Z [INFO] [MainThread] weather_station_client: Started at 1726689600.762621
+2024-09-18T20:00:00Z [INFO] [MainThread] client: Client is running.
+2024-09-18T20:00:00Z [INFO] [MainThread] client: Establishing connection to server ('localhost', 1337)
+2024-09-18T20:00:00Z [INFO] [MainThread] client: SSL established. Peer: {'subject': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'issuer': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'version': 1, 'serialNumber': '4BED22886654271F9A9CD5B410041B5EA3229BCD', 'notBefore': 'Sep 13 10:39:04 2024 GMT', 'notAfter': 'Sep 13 10:39:04 2025 GMT'}
+2024-09-18T20:00:00Z [INFO] [MainThread] client: Current & default connection configuration: buffer_size=1024 | max_msg_chunk_size=1024
+2024-09-18T20:00:00Z [INFO] [MainThread] client: Receiving connection-configuration-string from server
+2024-09-18T20:00:00Z [INFO] [MainThread] client: Updated connection-configurations.
+2024-09-18T20:00:00Z [INFO] [MainThread] client: «Connection-Configuration» Buffer-Size=2048 | Max-Msg-Chunk-Size=1024
+2024-09-18T20:00:00Z [ERROR] [MainThread] client: Received an ResponseCode-Error from the server: ResponseCode.INVALID_CREDENTIALS_ERROR
+2024-09-18T20:00:00Z [ERROR] [MainThread] client: Cannot proceed without being authenticated.
+2024-09-18T20:00:00Z [INFO] [MainThread] client: Received a CLOSE-CONNECTION-response from the server.
+2024-09-18T20:00:00Z [INFO] [MainThread] weather_station_client: Closed after 0.05329751968383789 seconds.
+2024-09-18T20:00:34Z [INFO] [MainThread] logging_config: Logging is set up and using ISO 8601 format with UTC time.
+2024-09-18T20:00:34Z [INFO] [MainThread] weather_station_client: Started at 1726689634.4819014
+2024-09-18T20:00:34Z [INFO] [MainThread] client: Client is running.
+2024-09-18T20:00:34Z [INFO] [MainThread] client: Establishing connection to server ('localhost', 1337)
+2024-09-18T20:00:34Z [INFO] [MainThread] client: SSL established. Peer: {'subject': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'issuer': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'version': 1, 'serialNumber': '4BED22886654271F9A9CD5B410041B5EA3229BCD', 'notBefore': 'Sep 13 10:39:04 2024 GMT', 'notAfter': 'Sep 13 10:39:04 2025 GMT'}
+2024-09-18T20:00:34Z [INFO] [MainThread] client: Current & default connection configuration: buffer_size=1024 | max_msg_chunk_size=1024
+2024-09-18T20:00:34Z [INFO] [MainThread] client: Receiving connection-configuration-string from server
+2024-09-18T20:00:34Z [INFO] [MainThread] client: Updated connection-configurations.
+2024-09-18T20:00:34Z [INFO] [MainThread] client: «Connection-Configuration» Buffer-Size=2048 | Max-Msg-Chunk-Size=1024
+2024-09-18T20:00:34Z [ERROR] [MainThread] client: Received an ResponseCode-Error from the server: ResponseCode.INVALID_CREDENTIALS_ERROR
+2024-09-18T20:00:34Z [ERROR] [MainThread] client: Cannot proceed without being authenticated.
+2024-09-18T20:00:34Z [INFO] [MainThread] client: Received a CLOSE-CONNECTION-response from the server.
+2024-09-18T20:00:34Z [INFO] [MainThread] weather_station_client: Closed after 0.0498051643371582 seconds.
+2024-09-18T20:01:46Z [INFO] [MainThread] logging_config: Logging is set up and using ISO 8601 format with UTC time.
+2024-09-18T20:01:46Z [INFO] [MainThread] weather_station_client: Started at 1726689706.9913707
+2024-09-18T20:01:46Z [INFO] [MainThread] client: Client is running.
+2024-09-18T20:01:46Z [INFO] [MainThread] client: Establishing connection to server ('localhost', 1337)
+2024-09-18T20:01:46Z [INFO] [MainThread] client: SSL established. Peer: {'subject': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'issuer': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'version': 1, 'serialNumber': '4BED22886654271F9A9CD5B410041B5EA3229BCD', 'notBefore': 'Sep 13 10:39:04 2024 GMT', 'notAfter': 'Sep 13 10:39:04 2025 GMT'}
+2024-09-18T20:01:46Z [INFO] [MainThread] client: Current & default connection configuration: buffer_size=1024 | max_msg_chunk_size=1024
+2024-09-18T20:01:46Z [INFO] [MainThread] client: Receiving connection-configuration-string from server
+2024-09-18T20:01:47Z [INFO] [MainThread] client: Updated connection-configurations.
+2024-09-18T20:01:47Z [INFO] [MainThread] client: «Connection-Configuration» Buffer-Size=2048 | Max-Msg-Chunk-Size=1024
+2024-09-18T20:01:47Z [INFO] [MainThread] client: Received an AUTHENTICATION-SUCCESSFUL-response from the server.
+2024-09-18T20:01:47Z [INFO] [MainThread] client: Getting client-commands from server
+2024-09-18T20:01:47Z [ERROR] [MainThread] client: Couldn't receive client-commands from server due to ResponseCode-Error: ResponseCode.NOT_ALLOWED_COMMAND_ERROR
+2024-09-18T20:01:47Z [ERROR] [MainThread] client: Couldn't get Client-Commands.
+2024-09-18T20:01:47Z [INFO] [MainThread] client: Received a CLOSE-CONNECTION-response from the server.
+2024-09-18T20:01:47Z [INFO] [MainThread] weather_station_client: Closed after 0.22564435005187988 seconds.
+2024-09-18T20:03:29Z [INFO] [MainThread] logging_config: Logging is set up and using ISO 8601 format with UTC time.
+2024-09-18T20:03:29Z [INFO] [MainThread] weather_station_client: Started at 1726689809.2455518
+2024-09-18T20:03:29Z [INFO] [MainThread] client: Client is running.
+2024-09-18T20:03:29Z [INFO] [MainThread] client: Establishing connection to server ('localhost', 1337)
+2024-09-18T20:03:29Z [INFO] [MainThread] client: SSL established. Peer: {'subject': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'issuer': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'version': 1, 'serialNumber': '4BED22886654271F9A9CD5B410041B5EA3229BCD', 'notBefore': 'Sep 13 10:39:04 2024 GMT', 'notAfter': 'Sep 13 10:39:04 2025 GMT'}
+2024-09-18T20:03:29Z [INFO] [MainThread] client: Current & default connection configuration: buffer_size=1024 | max_msg_chunk_size=1024
+2024-09-18T20:03:29Z [INFO] [MainThread] client: Receiving connection-configuration-string from server
+2024-09-18T20:03:29Z [INFO] [MainThread] client: Updated connection-configurations.
+2024-09-18T20:03:29Z [INFO] [MainThread] client: «Connection-Configuration» Buffer-Size=2048 | Max-Msg-Chunk-Size=1024
+2024-09-18T20:03:29Z [INFO] [MainThread] client: Received an AUTHENTICATION-SUCCESSFUL-response from the server.
+2024-09-18T20:03:29Z [INFO] [MainThread] client: Getting client-commands from server
+2024-09-18T20:03:29Z [INFO] [MainThread] client: Received 2 client-commands.
+2024-09-18T20:04:08Z [INFO] [MainThread] logging_config: Logging is set up and using ISO 8601 format with UTC time.
+2024-09-18T20:04:08Z [INFO] [MainThread] weather_station_client: Started at 1726689848.4720547
+2024-09-18T20:04:08Z [INFO] [MainThread] client: Client is running.
+2024-09-18T20:04:08Z [INFO] [MainThread] client: Establishing connection to server ('localhost', 1337)
+2024-09-18T20:04:08Z [INFO] [MainThread] client: SSL established. Peer: {'subject': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'issuer': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'version': 1, 'serialNumber': '4BED22886654271F9A9CD5B410041B5EA3229BCD', 'notBefore': 'Sep 13 10:39:04 2024 GMT', 'notAfter': 'Sep 13 10:39:04 2025 GMT'}
+2024-09-18T20:04:08Z [INFO] [MainThread] client: Current & default connection configuration: buffer_size=1024 | max_msg_chunk_size=1024
+2024-09-18T20:04:08Z [INFO] [MainThread] client: Receiving connection-configuration-string from server
+2024-09-18T20:04:08Z [INFO] [MainThread] client: Updated connection-configurations.
+2024-09-18T20:04:08Z [INFO] [MainThread] client: «Connection-Configuration» Buffer-Size=2048 | Max-Msg-Chunk-Size=1024
+2024-09-18T20:04:08Z [INFO] [MainThread] client: Received an AUTHENTICATION-SUCCESSFUL-response from the server.
+2024-09-18T20:04:08Z [INFO] [MainThread] client: Getting client-commands from server
+2024-09-18T20:04:08Z [INFO] [MainThread] client: Received 2 client-commands.
+2024-09-18T20:04:08Z [INFO] [MainThread] client: Got the measurement data from the sensors.
+2024-09-18T20:04:26Z [INFO] [MainThread] logging_config: Logging is set up and using ISO 8601 format with UTC time.
+2024-09-18T20:04:26Z [INFO] [MainThread] weather_station_client: Started at 1726689866.7272696
+2024-09-18T20:04:26Z [INFO] [MainThread] client: Client is running.
+2024-09-18T20:04:26Z [INFO] [MainThread] client: Establishing connection to server ('localhost', 1337)
+2024-09-18T20:04:26Z [INFO] [MainThread] client: SSL established. Peer: {'subject': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'issuer': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'version': 1, 'serialNumber': '4BED22886654271F9A9CD5B410041B5EA3229BCD', 'notBefore': 'Sep 13 10:39:04 2024 GMT', 'notAfter': 'Sep 13 10:39:04 2025 GMT'}
+2024-09-18T20:04:26Z [INFO] [MainThread] client: Current & default connection configuration: buffer_size=1024 | max_msg_chunk_size=1024
+2024-09-18T20:04:26Z [INFO] [MainThread] client: Receiving connection-configuration-string from server
+2024-09-18T20:04:26Z [INFO] [MainThread] client: Updated connection-configurations.
+2024-09-18T20:04:26Z [INFO] [MainThread] client: «Connection-Configuration» Buffer-Size=2048 | Max-Msg-Chunk-Size=1024
+2024-09-18T20:04:26Z [INFO] [MainThread] client: Received an AUTHENTICATION-SUCCESSFUL-response from the server.
+2024-09-18T20:04:26Z [INFO] [MainThread] client: Getting client-commands from server
+2024-09-18T20:04:26Z [INFO] [MainThread] client: Received 2 client-commands.
+2024-09-18T20:04:26Z [INFO] [MainThread] client: Got the measurement data from the sensors.
+2024-09-18T20:04:26Z [INFO] [MainThread] client: Prepared the response-for-server-string: `!#SendWeatherReportByStationName#!<WEATHER_STATION_NAME>Test Station Gaimersheim #1</WEATHER_STATION_NAME><TIMESTAMP>1726689866.9535983</TIMESTAMP><CURRENT_TEMP_K>10.5</CURRENT_TEMP_K><CURRENT_WIND_SPEED_KPH>15.9</CURRENT_WIND_SPEED_KPH><CURRENT_HUMIDITY_PERCENT>70.3</CURRENT_HUMIDITY_PERCENT><CURRENT_PRESSURE_HPA>1015.7</CURRENT_PRESSURE_HPA>` (345 Bytes)
+2024-09-18T20:04:26Z [INFO] [MainThread] client: Received a response from the server » (NO ERROR) !#CloseConnection#!
+2024-09-18T20:04:26Z [INFO] [MainThread] weather_station_client: Closed after 0.22845005989074707 seconds.
+2024-09-18T20:05:52Z [INFO] [MainThread] logging_config: Logging is set up and using ISO 8601 format with UTC time.
+2024-09-18T20:05:52Z [INFO] [MainThread] weather_station_client: Started at 1726689952.604902
+2024-09-18T20:05:52Z [INFO] [MainThread] client: Client is running.
+2024-09-18T20:05:52Z [INFO] [MainThread] client: Establishing connection to server ('localhost', 1337)
+2024-09-18T20:05:52Z [INFO] [MainThread] client: SSL established. Peer: {'subject': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'issuer': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'version': 1, 'serialNumber': '4BED22886654271F9A9CD5B410041B5EA3229BCD', 'notBefore': 'Sep 13 10:39:04 2024 GMT', 'notAfter': 'Sep 13 10:39:04 2025 GMT'}
+2024-09-18T20:05:52Z [INFO] [MainThread] client: Current & default connection configuration: buffer_size=1024 | max_msg_chunk_size=1024
+2024-09-18T20:05:52Z [INFO] [MainThread] client: Receiving connection-configuration-string from server
+2024-09-18T20:05:52Z [INFO] [MainThread] client: Updated connection-configurations.
+2024-09-18T20:05:52Z [INFO] [MainThread] client: «Connection-Configuration» Buffer-Size=2048 | Max-Msg-Chunk-Size=1024
+2024-09-18T20:05:52Z [INFO] [MainThread] client: Received an AUTHENTICATION-SUCCESSFUL-response from the server.
+2024-09-18T20:05:52Z [INFO] [MainThread] client: Getting client-commands from server
+2024-09-18T20:05:52Z [INFO] [MainThread] client: Received 2 client-commands.
+2024-09-18T20:05:52Z [INFO] [MainThread] client: Got the measurement data from the sensors.
+2024-09-18T20:05:52Z [INFO] [MainThread] client: Prepared the response-for-server-string: `!#SendWeatherReportByStationName#!<WEATHER_STATION_NAME>Test Station Gaimersheim #1</WEATHER_STATION_NAME><TIMESTAMP>1726689952.864278</TIMESTAMP><CURRENT_TEMP_K>10.5</CURRENT_TEMP_K><CURRENT_WIND_SPEED_KPH>15.9</CURRENT_WIND_SPEED_KPH><CURRENT_HUMIDITY_PERCENT>70.3</CURRENT_HUMIDITY_PERCENT><CURRENT_PRESSURE_HPA>1015.7</CURRENT_PRESSURE_HPA>` (344 Bytes)
+2024-09-18T20:05:52Z [INFO] [MainThread] client: Received a response from the server » (NO ERROR) !#CloseConnection#!
+2024-09-18T20:05:52Z [INFO] [MainThread] weather_station_client: Closed after 0.26183271408081055 seconds.
+2024-09-18T20:06:38Z [INFO] [MainThread] logging_config: Logging is set up and using ISO 8601 format with UTC time.
+2024-09-18T20:06:38Z [INFO] [MainThread] weather_station_client: Started at 1726689998.747542
+2024-09-18T20:06:38Z [INFO] [MainThread] client: Client is running.
+2024-09-18T20:06:38Z [INFO] [MainThread] client: Establishing connection to server ('localhost', 1337)
+2024-09-18T20:06:38Z [INFO] [MainThread] client: SSL established. Peer: {'subject': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'issuer': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'version': 1, 'serialNumber': '4BED22886654271F9A9CD5B410041B5EA3229BCD', 'notBefore': 'Sep 13 10:39:04 2024 GMT', 'notAfter': 'Sep 13 10:39:04 2025 GMT'}
+2024-09-18T20:06:38Z [INFO] [MainThread] client: Current & default connection configuration: buffer_size=1024 | max_msg_chunk_size=1024
+2024-09-18T20:06:38Z [INFO] [MainThread] client: Receiving connection-configuration-string from server
+2024-09-18T20:06:38Z [INFO] [MainThread] client: Updated connection-configurations.
+2024-09-18T20:06:38Z [INFO] [MainThread] client: «Connection-Configuration» Buffer-Size=2048 | Max-Msg-Chunk-Size=1024
+2024-09-18T20:06:38Z [INFO] [MainThread] client: Received an AUTHENTICATION-SUCCESSFUL-response from the server.
+2024-09-18T20:06:38Z [INFO] [MainThread] client: Getting client-commands from server
+2024-09-18T20:06:38Z [INFO] [MainThread] client: Received 2 client-commands.
+2024-09-18T20:06:38Z [INFO] [MainThread] client: Got the measurement data from the sensors.
+2024-09-18T20:06:38Z [INFO] [MainThread] client: Prepared the response-for-server-string: `!#SendWeatherReportByStationName#!<WEATHER_STATION_NAME>Test Station Gaimersheim #1</WEATHER_STATION_NAME><TIMESTAMP>1726689998.9716542</TIMESTAMP><CURRENT_TEMP_K>10.5</CURRENT_TEMP_K><CURRENT_WIND_SPEED_KPH>15.9</CURRENT_WIND_SPEED_KPH><CURRENT_HUMIDITY_PERCENT>70.3</CURRENT_HUMIDITY_PERCENT><CURRENT_PRESSURE_HPA>1015.7</CURRENT_PRESSURE_HPA>` (345 Bytes)
+2024-09-18T20:06:38Z [INFO] [MainThread] client: Received a response from the server » (DATABASE ERROR) Couldn't add the measurement to station (name='Test Station Gaimersheim #1').
+2024-09-18T20:06:38Z [INFO] [MainThread] client: Received a CLOSE-CONNECTION-response from the server.
+2024-09-18T20:06:38Z [INFO] [MainThread] weather_station_client: Closed after 0.2264111042022705 seconds.
+2024-09-18T20:09:18Z [INFO] [MainThread] logging_config: Logging is set up and using ISO 8601 format with UTC time.
+2024-09-18T20:09:18Z [INFO] [MainThread] weather_station_client: Started at 1726690158.2994878
+2024-09-18T20:09:18Z [INFO] [MainThread] client: Client is running.
+2024-09-18T20:09:18Z [INFO] [MainThread] client: Establishing connection to server ('localhost', 1337)
+2024-09-18T20:09:18Z [INFO] [MainThread] client: SSL established. Peer: {'subject': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'issuer': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'version': 1, 'serialNumber': '4BED22886654271F9A9CD5B410041B5EA3229BCD', 'notBefore': 'Sep 13 10:39:04 2024 GMT', 'notAfter': 'Sep 13 10:39:04 2025 GMT'}
+2024-09-18T20:09:18Z [INFO] [MainThread] client: Current & default connection configuration: buffer_size=1024 | max_msg_chunk_size=1024
+2024-09-18T20:09:18Z [INFO] [MainThread] client: Receiving connection-configuration-string from server
+2024-09-18T20:09:18Z [INFO] [MainThread] client: Updated connection-configurations.
+2024-09-18T20:09:18Z [INFO] [MainThread] client: «Connection-Configuration» Buffer-Size=2048 | Max-Msg-Chunk-Size=1024
+2024-09-18T20:09:18Z [INFO] [MainThread] client: Received an AUTHENTICATION-SUCCESSFUL-response from the server.
+2024-09-18T20:09:18Z [INFO] [MainThread] client: Getting client-commands from server
+2024-09-18T20:09:18Z [INFO] [MainThread] client: Received 2 client-commands.
+2024-09-18T20:09:18Z [INFO] [MainThread] client: Got the measurement data from the sensors.
+2024-09-18T20:09:18Z [INFO] [MainThread] client: Prepared the response-for-server-string: `!#SendWeatherReportByStationName#!<WEATHER_STATION_NAME>Test Station Gaimersheim #1</WEATHER_STATION_NAME><TIMESTAMP>1726690158.5234807</TIMESTAMP><CURRENT_TEMP_K>10.5</CURRENT_TEMP_K><CURRENT_WIND_SPEED_KPH>15.9</CURRENT_WIND_SPEED_KPH><CURRENT_HUMIDITY_PERCENT>70.3</CURRENT_HUMIDITY_PERCENT><CURRENT_PRESSURE_HPA>1015.7</CURRENT_PRESSURE_HPA>` (345 Bytes)
+2024-09-18T20:09:18Z [INFO] [MainThread] client: Received a response from the server » (DATABASE ERROR) Couldn't add the measurement to station (name='Test Station Gaimersheim #1').
+2024-09-18T20:09:18Z [INFO] [MainThread] client: Received a CLOSE-CONNECTION-response from the server.
+2024-09-18T20:09:18Z [INFO] [MainThread] weather_station_client: Closed after 0.2260303497314453 seconds.
+2024-09-18T20:15:29Z [INFO] [MainThread] logging_config: Logging is set up and using ISO 8601 format with UTC time.
+2024-09-18T20:15:29Z [INFO] [MainThread] weather_station_client: Started at 1726690529.9083033
+2024-09-18T20:15:29Z [INFO] [MainThread] client: Client is running.
+2024-09-18T20:15:29Z [INFO] [MainThread] client: Establishing connection to server ('localhost', 1337)
+2024-09-18T20:15:29Z [INFO] [MainThread] client: SSL established. Peer: {'subject': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'issuer': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'version': 1, 'serialNumber': '4BED22886654271F9A9CD5B410041B5EA3229BCD', 'notBefore': 'Sep 13 10:39:04 2024 GMT', 'notAfter': 'Sep 13 10:39:04 2025 GMT'}
+2024-09-18T20:15:29Z [INFO] [MainThread] client: Current & default connection configuration: buffer_size=1024 | max_msg_chunk_size=1024
+2024-09-18T20:15:29Z [INFO] [MainThread] client: Receiving connection-configuration-string from server
+2024-09-18T20:15:29Z [INFO] [MainThread] client: Updated connection-configurations.
+2024-09-18T20:15:29Z [INFO] [MainThread] client: «Connection-Configuration» Buffer-Size=2048 | Max-Msg-Chunk-Size=1024
+2024-09-18T20:15:30Z [INFO] [MainThread] client: Received an AUTHENTICATION-SUCCESSFUL-response from the server.
+2024-09-18T20:15:30Z [INFO] [MainThread] client: Getting client-commands from server
+2024-09-18T20:15:30Z [INFO] [MainThread] client: Received 2 client-commands.
+2024-09-18T20:15:30Z [INFO] [MainThread] client: Got the measurement data from the sensors.
+2024-09-18T20:15:30Z [INFO] [MainThread] client: Prepared the response-for-server-string: `!#SendWeatherReportByStationName#!<WEATHER_STATION_NAME>Test Station Gaimersheim #1</WEATHER_STATION_NAME><TIMESTAMP>1726690530.133215</TIMESTAMP><CURRENT_TEMP_K>10.5</CURRENT_TEMP_K><CURRENT_WIND_SPEED_KPH>15.9</CURRENT_WIND_SPEED_KPH><CURRENT_HUMIDITY_PERCENT>70.3</CURRENT_HUMIDITY_PERCENT><CURRENT_PRESSURE_HPA>1015.7</CURRENT_PRESSURE_HPA>` (344 Bytes)
+2024-09-18T20:15:30Z [INFO] [MainThread] client: Received a response from the server » (NO ERROR) Successfully added a new measurement to the station with the name 'Test Station Gaimersheim #1'.
+2024-09-18T20:15:30Z [INFO] [MainThread] client: Received a CLOSE-CONNECTION-response from the server.
+2024-09-18T20:15:30Z [INFO] [MainThread] weather_station_client: Closed after 0.2359762191772461 seconds.
+2024-09-18T20:28:49Z [INFO] [MainThread] logging_config: Logging is set up and using ISO 8601 format with UTC time.
+2024-09-18T20:28:49Z [INFO] [MainThread] weather_station_client: Started at 1726691329.9918025
+2024-09-18T20:28:49Z [INFO] [MainThread] client: Client is running.
+2024-09-18T20:28:49Z [INFO] [MainThread] client: Establishing connection to server ('localhost', 1337)
+2024-09-18T20:28:49Z [INFO] [MainThread] client: SSL established. Peer: {'subject': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'issuer': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'version': 1, 'serialNumber': '4BED22886654271F9A9CD5B410041B5EA3229BCD', 'notBefore': 'Sep 13 10:39:04 2024 GMT', 'notAfter': 'Sep 13 10:39:04 2025 GMT'}
+2024-09-18T20:28:49Z [INFO] [MainThread] client: Current & default connection configuration: buffer_size=1024 | max_msg_chunk_size=1024
+2024-09-18T20:28:49Z [INFO] [MainThread] client: Receiving connection-configuration-string from server
+2024-09-18T20:28:50Z [INFO] [MainThread] client: Updated connection-configurations.
+2024-09-18T20:28:50Z [INFO] [MainThread] client: «Connection-Configuration» Buffer-Size=2048 | Max-Msg-Chunk-Size=1024
+2024-09-18T20:28:50Z [INFO] [MainThread] client: Received an AUTHENTICATION-SUCCESSFUL-response from the server.
+2024-09-18T20:28:50Z [INFO] [MainThread] client: Getting client-commands from server
+2024-09-18T20:28:50Z [INFO] [MainThread] client: Received 2 client-commands.
+2024-09-18T20:28:50Z [INFO] [MainThread] client: Got the measurement data from the sensors.
+2024-09-18T20:28:50Z [INFO] [MainThread] client: Prepared the response-for-server-string: `!#SendWeatherReportByStationName#!<WEATHER_STATION_NAME>Test Station Gaimersheim #1</WEATHER_STATION_NAME><TIMESTAMP>1726691330.2146938</TIMESTAMP><CURRENT_TEMP_K>10.5</CURRENT_TEMP_K><CURRENT_WIND_SPEED_KPH>15.9</CURRENT_WIND_SPEED_KPH><CURRENT_HUMIDITY_PERCENT>70.3</CURRENT_HUMIDITY_PERCENT><CURRENT_PRESSURE_HPA>1015.7</CURRENT_PRESSURE_HPA>` (345 Bytes)
+2024-09-18T20:28:50Z [INFO] [MainThread] client: Received a response from the server » (NOT ALLOWED COMMAND ERROR) You're not allowed to add a measurement-report to the weather-station 'Test Station Gaimersheim #1' (1)
+2024-09-18T20:28:50Z [INFO] [MainThread] client: Received a CLOSE-CONNECTION-response from the server.
+2024-09-18T20:28:50Z [INFO] [MainThread] weather_station_client: Closed after 0.22652482986450195 seconds.
+2024-09-18T20:30:23Z [INFO] [MainThread] logging_config: Logging is set up and using ISO 8601 format with UTC time.
+2024-09-18T20:30:23Z [INFO] [MainThread] weather_station_client: Started at 1726691423.071913
+2024-09-18T20:30:23Z [INFO] [MainThread] client: Client is running.
+2024-09-18T20:30:23Z [INFO] [MainThread] client: Establishing connection to server ('localhost', 1337)
+2024-09-18T20:30:23Z [INFO] [MainThread] client: SSL established. Peer: {'subject': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'issuer': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'version': 1, 'serialNumber': '4BED22886654271F9A9CD5B410041B5EA3229BCD', 'notBefore': 'Sep 13 10:39:04 2024 GMT', 'notAfter': 'Sep 13 10:39:04 2025 GMT'}
+2024-09-18T20:30:23Z [INFO] [MainThread] client: Current & default connection configuration: buffer_size=1024 | max_msg_chunk_size=1024
+2024-09-18T20:30:23Z [INFO] [MainThread] client: Receiving connection-configuration-string from server
+2024-09-18T20:30:23Z [INFO] [MainThread] client: Updated connection-configurations.
+2024-09-18T20:30:23Z [INFO] [MainThread] client: «Connection-Configuration» Buffer-Size=2048 | Max-Msg-Chunk-Size=1024
+2024-09-18T20:30:23Z [INFO] [MainThread] client: Received an AUTHENTICATION-SUCCESSFUL-response from the server.
+2024-09-18T20:30:23Z [INFO] [MainThread] client: Getting client-commands from server
+2024-09-18T20:30:23Z [INFO] [MainThread] client: Received 2 client-commands.
+2024-09-18T20:30:23Z [INFO] [MainThread] client: Got the measurement data from the sensors.
+2024-09-18T20:30:23Z [INFO] [MainThread] client: Prepared the response-for-server-string: `!#SendWeatherReportByStationName#!<WEATHER_STATION_NAME>Test Station Gaimersheim #1</WEATHER_STATION_NAME><TIMESTAMP>1726691423.337502</TIMESTAMP><CURRENT_TEMP_K>10.5</CURRENT_TEMP_K><CURRENT_WIND_SPEED_KPH>15.9</CURRENT_WIND_SPEED_KPH><CURRENT_HUMIDITY_PERCENT>70.3</CURRENT_HUMIDITY_PERCENT><CURRENT_PRESSURE_HPA>1015.7</CURRENT_PRESSURE_HPA>` (344 Bytes)
+2024-09-18T20:30:23Z [INFO] [MainThread] client: Received a response from the server » (NOT ALLOWED COMMAND ERROR) You're not allowed to add a measurement-report to the weather-station 'Test Station Gaimersheim #1' (1), because you're not the owner of this station.
+2024-09-18T20:30:23Z [INFO] [MainThread] client: Received a CLOSE-CONNECTION-response from the server.
+2024-09-18T20:30:23Z [INFO] [MainThread] weather_station_client: Closed after 0.26906442642211914 seconds.
+2024-09-18T20:31:43Z [INFO] [MainThread] logging_config: Logging is set up and using ISO 8601 format with UTC time.
+2024-09-18T20:31:43Z [INFO] [MainThread] weather_station_client: Started at 1726691503.1658022
+2024-09-18T20:31:43Z [INFO] [MainThread] client: Client is running.
+2024-09-18T20:31:43Z [INFO] [MainThread] client: Establishing connection to server ('localhost', 1337)
+2024-09-18T20:31:43Z [INFO] [MainThread] client: SSL established. Peer: {'subject': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'issuer': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'version': 1, 'serialNumber': '4BED22886654271F9A9CD5B410041B5EA3229BCD', 'notBefore': 'Sep 13 10:39:04 2024 GMT', 'notAfter': 'Sep 13 10:39:04 2025 GMT'}
+2024-09-18T20:31:43Z [INFO] [MainThread] client: Current & default connection configuration: buffer_size=1024 | max_msg_chunk_size=1024
+2024-09-18T20:31:43Z [INFO] [MainThread] client: Receiving connection-configuration-string from server
+2024-09-18T20:31:43Z [INFO] [MainThread] client: Updated connection-configurations.
+2024-09-18T20:31:43Z [INFO] [MainThread] client: «Connection-Configuration» Buffer-Size=2048 | Max-Msg-Chunk-Size=1024
+2024-09-18T20:31:43Z [INFO] [MainThread] client: Received an AUTHENTICATION-SUCCESSFUL-response from the server.
+2024-09-18T20:31:43Z [INFO] [MainThread] client: Getting client-commands from server
+2024-09-18T20:31:43Z [INFO] [MainThread] client: Received 2 client-commands.
+2024-09-18T20:31:43Z [INFO] [MainThread] client: Got the measurement data from the sensors.
+2024-09-18T20:31:43Z [INFO] [MainThread] client: Prepared the response-for-server-string: `!#SendWeatherReportByStationName#!<WEATHER_STATION_NAME>Test Station Gaimersheim #1</WEATHER_STATION_NAME><TIMESTAMP>1726691503.3949888</TIMESTAMP><CURRENT_TEMP_K>10.5</CURRENT_TEMP_K><CURRENT_WIND_SPEED_KPH>15.9</CURRENT_WIND_SPEED_KPH><CURRENT_HUMIDITY_PERCENT>70.3</CURRENT_HUMIDITY_PERCENT><CURRENT_PRESSURE_HPA>1015.7</CURRENT_PRESSURE_HPA>` (345 Bytes)
+2024-09-18T20:31:43Z [INFO] [MainThread] client: Received a response from the server » (NOT ALLOWED COMMAND ERROR) You're not allowed to add a measurement-report to the weather-station 'Test Station Gaimersheim #1' (1), because you're not the owner of this station.
+2024-09-18T20:31:43Z [INFO] [MainThread] client: Received a CLOSE-CONNECTION-response from the server.
+2024-09-18T20:31:43Z [INFO] [MainThread] weather_station_client: Closed after 0.23286938667297363 seconds.
+2024-09-18T22:28:01Z [INFO] [MainThread] logging_config: Logging is set up and using ISO 8601 format with UTC time.
+2024-09-18T22:28:01Z [INFO] [MainThread] weather_station_client: Started at 1726698481.162726
+2024-09-18T22:28:01Z [INFO] [MainThread] client: Client is running.
+2024-09-18T22:28:01Z [INFO] [MainThread] client: Establishing connection to server ('localhost', 1337)
+2024-09-18T22:28:01Z [INFO] [MainThread] client: SSL established. Peer: {'subject': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'issuer': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'version': 1, 'serialNumber': '4BED22886654271F9A9CD5B410041B5EA3229BCD', 'notBefore': 'Sep 13 10:39:04 2024 GMT', 'notAfter': 'Sep 13 10:39:04 2025 GMT'}
+2024-09-18T22:28:01Z [INFO] [MainThread] client: Current & default connection configuration: buffer_size=1024 | max_msg_chunk_size=1024
+2024-09-18T22:28:01Z [INFO] [MainThread] client: Receiving connection-configuration-string from server
+2024-09-18T22:28:01Z [INFO] [MainThread] client: Updated connection-configurations.
+2024-09-18T22:28:01Z [INFO] [MainThread] client: «Connection-Configuration» Buffer-Size=2048 | Max-Msg-Chunk-Size=1024
+2024-09-18T22:28:01Z [INFO] [MainThread] client: Received an AUTHENTICATION-SUCCESSFUL-response from the server.
+2024-09-18T22:28:01Z [INFO] [MainThread] client: Getting client-commands from server
+2024-09-18T22:28:01Z [INFO] [MainThread] client: Received 2 client-commands.
+2024-09-18T22:28:01Z [INFO] [MainThread] client: Got the measurement data from the sensors.
+2024-09-18T22:28:01Z [INFO] [MainThread] client: Prepared the response-for-server-string: `!#SendWeatherReportByStationName#!<WEATHER_STATION_NAME>Test Station Gaimersheim #1</WEATHER_STATION_NAME><TIMESTAMP>1726698481.425112</TIMESTAMP><CURRENT_TEMP_K>10.5</CURRENT_TEMP_K><CURRENT_WIND_SPEED_KPH>15.9</CURRENT_WIND_SPEED_KPH><CURRENT_HUMIDITY_PERCENT>70.3</CURRENT_HUMIDITY_PERCENT><CURRENT_PRESSURE_HPA>1015.7</CURRENT_PRESSURE_HPA>` (344 Bytes)
+2024-09-18T22:28:01Z [INFO] [MainThread] client: Received a response from the server » (NOT ALLOWED COMMAND ERROR) You're not allowed to add a measurement-report to the weather-station 'Test Station Gaimersheim #1' (1), because you're not the owner of this station.
+2024-09-18T22:28:01Z [INFO] [MainThread] client: Received a CLOSE-CONNECTION-response from the server.
+2024-09-18T22:28:01Z [INFO] [MainThread] weather_station_client: Closed after 0.2645530700683594 seconds.
+2024-09-18T22:28:06Z [INFO] [MainThread] logging_config: Logging is set up and using ISO 8601 format with UTC time.
+2024-09-18T22:28:06Z [INFO] [MainThread] weather_station_client: Started at 1726698486.2153702
+2024-09-18T22:28:06Z [INFO] [MainThread] client: Client is running.
+2024-09-18T22:28:06Z [INFO] [MainThread] client: Establishing connection to server ('localhost', 1337)
+2024-09-18T22:28:06Z [INFO] [MainThread] client: SSL established. Peer: {'subject': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'issuer': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'version': 1, 'serialNumber': '4BED22886654271F9A9CD5B410041B5EA3229BCD', 'notBefore': 'Sep 13 10:39:04 2024 GMT', 'notAfter': 'Sep 13 10:39:04 2025 GMT'}
+2024-09-18T22:28:06Z [INFO] [MainThread] client: Current & default connection configuration: buffer_size=1024 | max_msg_chunk_size=1024
+2024-09-18T22:28:06Z [INFO] [MainThread] client: Receiving connection-configuration-string from server
+2024-09-18T22:28:06Z [INFO] [MainThread] client: Updated connection-configurations.
+2024-09-18T22:28:06Z [INFO] [MainThread] client: «Connection-Configuration» Buffer-Size=2048 | Max-Msg-Chunk-Size=1024
+2024-09-18T22:28:06Z [INFO] [MainThread] client: Received an AUTHENTICATION-SUCCESSFUL-response from the server.
+2024-09-18T22:28:06Z [INFO] [MainThread] client: Getting client-commands from server
+2024-09-18T22:28:06Z [INFO] [MainThread] client: Received 2 client-commands.
+2024-09-18T22:28:06Z [INFO] [MainThread] client: Got the measurement data from the sensors.
+2024-09-18T22:28:06Z [INFO] [MainThread] client: Prepared the response-for-server-string: `!#SendWeatherReportByStationName#!<WEATHER_STATION_NAME>Test Station Gaimersheim #1</WEATHER_STATION_NAME><TIMESTAMP>1726698486.4775553</TIMESTAMP><CURRENT_TEMP_K>10.5</CURRENT_TEMP_K><CURRENT_WIND_SPEED_KPH>15.9</CURRENT_WIND_SPEED_KPH><CURRENT_HUMIDITY_PERCENT>70.3</CURRENT_HUMIDITY_PERCENT><CURRENT_PRESSURE_HPA>1015.7</CURRENT_PRESSURE_HPA>` (345 Bytes)
+2024-09-18T22:28:06Z [INFO] [MainThread] client: Received a response from the server » (NOT ALLOWED COMMAND ERROR) You're not allowed to add a measurement-report to the weather-station 'Test Station Gaimersheim #1' (1), because you're not the owner of this station.
+2024-09-18T22:28:06Z [INFO] [MainThread] client: Received a CLOSE-CONNECTION-response from the server.
+2024-09-18T22:28:06Z [INFO] [MainThread] weather_station_client: Closed after 0.2636713981628418 seconds.
+2024-09-18T22:28:06Z [INFO] [MainThread] logging_config: Logging is set up and using ISO 8601 format with UTC time.
+2024-09-18T22:28:06Z [INFO] [MainThread] weather_station_client: Started at 1726698486.8898482
+2024-09-18T22:28:06Z [INFO] [MainThread] client: Client is running.
+2024-09-18T22:28:06Z [INFO] [MainThread] client: Establishing connection to server ('localhost', 1337)
+2024-09-18T22:28:06Z [INFO] [MainThread] client: SSL established. Peer: {'subject': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'issuer': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'version': 1, 'serialNumber': '4BED22886654271F9A9CD5B410041B5EA3229BCD', 'notBefore': 'Sep 13 10:39:04 2024 GMT', 'notAfter': 'Sep 13 10:39:04 2025 GMT'}
+2024-09-18T22:28:06Z [INFO] [MainThread] client: Current & default connection configuration: buffer_size=1024 | max_msg_chunk_size=1024
+2024-09-18T22:28:06Z [INFO] [MainThread] client: Receiving connection-configuration-string from server
+2024-09-18T22:28:06Z [INFO] [MainThread] client: Updated connection-configurations.
+2024-09-18T22:28:06Z [INFO] [MainThread] client: «Connection-Configuration» Buffer-Size=2048 | Max-Msg-Chunk-Size=1024
+2024-09-18T22:28:07Z [INFO] [MainThread] client: Received an AUTHENTICATION-SUCCESSFUL-response from the server.
+2024-09-18T22:28:07Z [INFO] [MainThread] client: Getting client-commands from server
+2024-09-18T22:28:07Z [INFO] [MainThread] client: Received 2 client-commands.
+2024-09-18T22:28:07Z [INFO] [MainThread] client: Got the measurement data from the sensors.
+2024-09-18T22:28:07Z [INFO] [MainThread] client: Prepared the response-for-server-string: `!#SendWeatherReportByStationName#!<WEATHER_STATION_NAME>Test Station Gaimersheim #1</WEATHER_STATION_NAME><TIMESTAMP>1726698487.1468604</TIMESTAMP><CURRENT_TEMP_K>10.5</CURRENT_TEMP_K><CURRENT_WIND_SPEED_KPH>15.9</CURRENT_WIND_SPEED_KPH><CURRENT_HUMIDITY_PERCENT>70.3</CURRENT_HUMIDITY_PERCENT><CURRENT_PRESSURE_HPA>1015.7</CURRENT_PRESSURE_HPA>` (345 Bytes)
+2024-09-18T22:28:07Z [INFO] [MainThread] client: Received a response from the server » (NOT ALLOWED COMMAND ERROR) You're not allowed to add a measurement-report to the weather-station 'Test Station Gaimersheim #1' (1), because you're not the owner of this station.
+2024-09-18T22:28:07Z [INFO] [MainThread] client: Received a CLOSE-CONNECTION-response from the server.
+2024-09-18T22:28:07Z [INFO] [MainThread] weather_station_client: Closed after 0.25865769386291504 seconds.
+2024-09-18T22:31:07Z [INFO] [MainThread] logging_config: Logging is set up and using ISO 8601 format with UTC time.
+2024-09-18T22:31:07Z [INFO] [MainThread] weather_station_client: Started at 1726698667.8530781
+2024-09-18T22:31:07Z [INFO] [MainThread] client: Client is running.
+2024-09-18T22:31:07Z [INFO] [MainThread] client: Establishing connection to server ('localhost', 1337)
+2024-09-18T22:31:07Z [INFO] [MainThread] client: SSL established. Peer: {'subject': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'issuer': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'version': 1, 'serialNumber': '4BED22886654271F9A9CD5B410041B5EA3229BCD', 'notBefore': 'Sep 13 10:39:04 2024 GMT', 'notAfter': 'Sep 13 10:39:04 2025 GMT'}
+2024-09-18T22:31:07Z [INFO] [MainThread] client: Current & default connection configuration: buffer_size=1024 | max_msg_chunk_size=1024
+2024-09-18T22:31:07Z [INFO] [MainThread] client: Receiving connection-configuration-string from server
+2024-09-18T22:31:07Z [INFO] [MainThread] client: Updated connection-configurations.
+2024-09-18T22:31:07Z [INFO] [MainThread] client: «Connection-Configuration» Buffer-Size=2048 | Max-Msg-Chunk-Size=1024
+2024-09-18T22:31:08Z [INFO] [MainThread] client: Received an AUTHENTICATION-SUCCESSFUL-response from the server.
+2024-09-18T22:31:08Z [INFO] [MainThread] client: Getting client-commands from server
+2024-09-18T22:31:08Z [INFO] [MainThread] client: Received 2 client-commands.
+2024-09-18T22:31:08Z [INFO] [MainThread] client: Got the measurement data from the sensors.
+2024-09-18T22:31:08Z [INFO] [MainThread] client: Prepared the response-for-server-string: `!#SendWeatherReportByStationName#!<WEATHER_STATION_NAME>Another Test Station in Gaimersheim IDK</WEATHER_STATION_NAME><TIMESTAMP>1726698668.1136546</TIMESTAMP><CURRENT_TEMP_K>10.5</CURRENT_TEMP_K><CURRENT_WIND_SPEED_KPH>15.9</CURRENT_WIND_SPEED_KPH><CURRENT_HUMIDITY_PERCENT>70.3</CURRENT_HUMIDITY_PERCENT><CURRENT_PRESSURE_HPA>1015.7</CURRENT_PRESSURE_HPA>` (357 Bytes)
+2024-09-18T22:31:08Z [INFO] [MainThread] client: Received a response from the server » (NO ERROR) Successfully added a new measurement to the station with the name 'Another Test Station in Gaimersheim IDK'.
+2024-09-18T22:31:08Z [INFO] [MainThread] client: Received a CLOSE-CONNECTION-response from the server.
+2024-09-18T22:31:08Z [INFO] [MainThread] weather_station_client: Closed after 0.2680990695953369 seconds.
+2024-09-18T22:31:11Z [INFO] [MainThread] logging_config: Logging is set up and using ISO 8601 format with UTC time.
+2024-09-18T22:31:11Z [INFO] [MainThread] weather_station_client: Started at 1726698671.478509
+2024-09-18T22:31:11Z [INFO] [MainThread] client: Client is running.
+2024-09-18T22:31:11Z [INFO] [MainThread] client: Establishing connection to server ('localhost', 1337)
+2024-09-18T22:31:11Z [INFO] [MainThread] client: SSL established. Peer: {'subject': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'issuer': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'version': 1, 'serialNumber': '4BED22886654271F9A9CD5B410041B5EA3229BCD', 'notBefore': 'Sep 13 10:39:04 2024 GMT', 'notAfter': 'Sep 13 10:39:04 2025 GMT'}
+2024-09-18T22:31:11Z [INFO] [MainThread] client: Current & default connection configuration: buffer_size=1024 | max_msg_chunk_size=1024
+2024-09-18T22:31:11Z [INFO] [MainThread] client: Receiving connection-configuration-string from server
+2024-09-18T22:31:11Z [INFO] [MainThread] client: Updated connection-configurations.
+2024-09-18T22:31:11Z [INFO] [MainThread] client: «Connection-Configuration» Buffer-Size=2048 | Max-Msg-Chunk-Size=1024
+2024-09-18T22:31:11Z [INFO] [MainThread] client: Received an AUTHENTICATION-SUCCESSFUL-response from the server.
+2024-09-18T22:31:11Z [INFO] [MainThread] client: Getting client-commands from server
+2024-09-18T22:31:11Z [INFO] [MainThread] client: Received 2 client-commands.
+2024-09-18T22:31:11Z [INFO] [MainThread] client: Got the measurement data from the sensors.
+2024-09-18T22:31:11Z [INFO] [MainThread] client: Prepared the response-for-server-string: `!#SendWeatherReportByStationName#!<WEATHER_STATION_NAME>Another Test Station in Gaimersheim IDK</WEATHER_STATION_NAME><TIMESTAMP>1726698671.7360542</TIMESTAMP><CURRENT_TEMP_K>10.5</CURRENT_TEMP_K><CURRENT_WIND_SPEED_KPH>15.9</CURRENT_WIND_SPEED_KPH><CURRENT_HUMIDITY_PERCENT>70.3</CURRENT_HUMIDITY_PERCENT><CURRENT_PRESSURE_HPA>1015.7</CURRENT_PRESSURE_HPA>` (357 Bytes)
+2024-09-18T22:31:11Z [INFO] [MainThread] client: Received a response from the server » (NO ERROR) Successfully added a new measurement to the station with the name 'Another Test Station in Gaimersheim IDK'.
+2024-09-18T22:31:11Z [INFO] [MainThread] client: Received a CLOSE-CONNECTION-response from the server.
+2024-09-18T22:31:11Z [INFO] [MainThread] weather_station_client: Closed after 0.26547980308532715 seconds.
+2024-09-18T22:31:12Z [INFO] [MainThread] logging_config: Logging is set up and using ISO 8601 format with UTC time.
+2024-09-18T22:31:12Z [INFO] [MainThread] weather_station_client: Started at 1726698672.558582
+2024-09-18T22:31:12Z [INFO] [MainThread] client: Client is running.
+2024-09-18T22:31:12Z [INFO] [MainThread] client: Establishing connection to server ('localhost', 1337)
+2024-09-18T22:31:12Z [INFO] [MainThread] client: SSL established. Peer: {'subject': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'issuer': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'version': 1, 'serialNumber': '4BED22886654271F9A9CD5B410041B5EA3229BCD', 'notBefore': 'Sep 13 10:39:04 2024 GMT', 'notAfter': 'Sep 13 10:39:04 2025 GMT'}
+2024-09-18T22:31:12Z [INFO] [MainThread] client: Current & default connection configuration: buffer_size=1024 | max_msg_chunk_size=1024
+2024-09-18T22:31:12Z [INFO] [MainThread] client: Receiving connection-configuration-string from server
+2024-09-18T22:31:12Z [INFO] [MainThread] client: Updated connection-configurations.
+2024-09-18T22:31:12Z [INFO] [MainThread] client: «Connection-Configuration» Buffer-Size=2048 | Max-Msg-Chunk-Size=1024
+2024-09-18T22:31:12Z [INFO] [MainThread] client: Received an AUTHENTICATION-SUCCESSFUL-response from the server.
+2024-09-18T22:31:12Z [INFO] [MainThread] client: Getting client-commands from server
+2024-09-18T22:31:12Z [INFO] [MainThread] client: Received 2 client-commands.
+2024-09-18T22:31:12Z [INFO] [MainThread] client: Got the measurement data from the sensors.
+2024-09-18T22:31:12Z [INFO] [MainThread] client: Prepared the response-for-server-string: `!#SendWeatherReportByStationName#!<WEATHER_STATION_NAME>Another Test Station in Gaimersheim IDK</WEATHER_STATION_NAME><TIMESTAMP>1726698672.8229458</TIMESTAMP><CURRENT_TEMP_K>10.5</CURRENT_TEMP_K><CURRENT_WIND_SPEED_KPH>15.9</CURRENT_WIND_SPEED_KPH><CURRENT_HUMIDITY_PERCENT>70.3</CURRENT_HUMIDITY_PERCENT><CURRENT_PRESSURE_HPA>1015.7</CURRENT_PRESSURE_HPA>` (357 Bytes)
+2024-09-18T22:31:12Z [INFO] [MainThread] client: Received a response from the server » (NO ERROR) Successfully added a new measurement to the station with the name 'Another Test Station in Gaimersheim IDK'.
+2024-09-18T22:31:12Z [INFO] [MainThread] client: Received a CLOSE-CONNECTION-response from the server.
+2024-09-18T22:31:12Z [INFO] [MainThread] weather_station_client: Closed after 0.2718641757965088 seconds.
+2024-09-18T23:17:47Z [INFO] [MainThread] logging_config: Logging is set up and using ISO 8601 format with UTC time.
+2024-09-18T23:17:47Z [INFO] [MainThread] weather_station_client: Started at 1726701467.6069705
+2024-09-18T23:17:47Z [INFO] [MainThread] client: Client is running.
+2024-09-18T23:17:47Z [INFO] [MainThread] client: Establishing connection to server ('localhost', 1337)
+2024-09-18T23:17:47Z [ERROR] [MainThread] client: Couldn't connect to the server: [Errno 111] Connection refused
+2024-09-18T23:17:47Z [ERROR] [MainThread] client: Couldn't establish a connection to the server.
+2024-09-18T23:17:47Z [INFO] [MainThread] weather_station_client: Closed after 0.006406307220458984 seconds.
+2024-09-18T23:20:39Z [INFO] [MainThread] logging_config: Logging is set up and using ISO 8601 format with UTC time.
+2024-09-18T23:20:39Z [INFO] [MainThread] weather_station_client: Started at 1726701639.420814
+2024-09-18T23:20:39Z [INFO] [MainThread] client: Client is running.
+2024-09-18T23:20:39Z [INFO] [MainThread] client: Establishing connection to server ('localhost', 1337)
+2024-09-18T23:20:39Z [INFO] [MainThread] client: SSL established. Peer: {'subject': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'issuer': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'version': 1, 'serialNumber': '4BED22886654271F9A9CD5B410041B5EA3229BCD', 'notBefore': 'Sep 13 10:39:04 2024 GMT', 'notAfter': 'Sep 13 10:39:04 2025 GMT'}
+2024-09-18T23:20:39Z [INFO] [MainThread] client: Current & default connection configuration: buffer_size=1024 | max_msg_chunk_size=1024
+2024-09-18T23:20:39Z [INFO] [MainThread] client: Receiving connection-configuration-string from server
+2024-09-18T23:20:39Z [INFO] [MainThread] client: Updated connection-configurations.
+2024-09-18T23:20:39Z [INFO] [MainThread] client: «Connection-Configuration» Buffer-Size=2048 | Max-Msg-Chunk-Size=1024
+2024-09-18T23:20:39Z [INFO] [MainThread] client: Received an AUTHENTICATION-SUCCESSFUL-response from the server.
+2024-09-18T23:20:39Z [INFO] [MainThread] client: Getting client-commands from server
+2024-09-18T23:20:39Z [INFO] [MainThread] client: Received 2 client-commands.
+2024-09-18T23:20:39Z [INFO] [MainThread] client: Got the measurement data from the sensors.
+2024-09-18T23:20:39Z [INFO] [MainThread] client: Prepared the response-for-server-string: `!#SendWeatherReportByStationName#!<WEATHER_STATION_NAME>Another Test Station in Gaimersheim IDK</WEATHER_STATION_NAME><TIMESTAMP>1726701639.6685944</TIMESTAMP><CURRENT_TEMP_K>10.5</CURRENT_TEMP_K><CURRENT_WIND_SPEED_KPH>15.9</CURRENT_WIND_SPEED_KPH><CURRENT_HUMIDITY_PERCENT>70.3</CURRENT_HUMIDITY_PERCENT><CURRENT_PRESSURE_HPA>1015.7</CURRENT_PRESSURE_HPA>` (357 Bytes)
+2024-09-18T23:20:39Z [INFO] [MainThread] client: Received a response from the server » (NO ERROR) Successfully added a new measurement to the station with the name 'Another Test Station in Gaimersheim IDK'.
+2024-09-18T23:20:39Z [INFO] [MainThread] client: Received a CLOSE-CONNECTION-response from the server.
+2024-09-18T23:20:39Z [INFO] [MainThread] weather_station_client: Closed after 0.2585124969482422 seconds.
+2024-09-18T23:28:09Z [INFO] [MainThread] logging_config: Logging is set up and using ISO 8601 format with UTC time.
+2024-09-18T23:28:09Z [INFO] [MainThread] weather_station_client: Started at 1726702089.3165793
+2024-09-18T23:28:09Z [INFO] [MainThread] client: Client is running.
+2024-09-18T23:28:09Z [INFO] [MainThread] client: Establishing connection to server ('localhost', 1337)
+2024-09-18T23:28:09Z [INFO] [MainThread] client: SSL established. Peer: {'subject': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'issuer': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'version': 1, 'serialNumber': '4BED22886654271F9A9CD5B410041B5EA3229BCD', 'notBefore': 'Sep 13 10:39:04 2024 GMT', 'notAfter': 'Sep 13 10:39:04 2025 GMT'}
+2024-09-18T23:28:09Z [INFO] [MainThread] client: Current & default connection configuration: buffer_size=1024 | max_msg_chunk_size=1024
+2024-09-18T23:28:09Z [INFO] [MainThread] client: Receiving connection-configuration-string from server
+2024-09-18T23:28:09Z [INFO] [MainThread] client: Updated connection-configurations.
+2024-09-18T23:28:09Z [INFO] [MainThread] client: «Connection-Configuration» Buffer-Size=2048 | Max-Msg-Chunk-Size=1024
+2024-09-18T23:28:09Z [INFO] [MainThread] client: Received an AUTHENTICATION-SUCCESSFUL-response from the server.
+2024-09-18T23:28:09Z [INFO] [MainThread] client: Getting client-commands from server
+2024-09-18T23:28:09Z [INFO] [MainThread] client: Received 2 client-commands.
+2024-09-18T23:28:09Z [INFO] [MainThread] client: Got the measurement data from the sensors.
+2024-09-18T23:28:09Z [INFO] [MainThread] client: Prepared the response-for-server-string: `!#SendWeatherReportByStationName#!<WEATHER_STATION_NAME>Another Test Station in Gaimersheim IDK</WEATHER_STATION_NAME><TIMESTAMP>1726702089.5455158</TIMESTAMP><CURRENT_TEMP_K>10.5</CURRENT_TEMP_K><CURRENT_WIND_SPEED_KPH>15.9</CURRENT_WIND_SPEED_KPH><CURRENT_HUMIDITY_PERCENT>70.3</CURRENT_HUMIDITY_PERCENT><CURRENT_PRESSURE_HPA>1015.7</CURRENT_PRESSURE_HPA>` (357 Bytes)
+2024-09-18T23:28:09Z [INFO] [MainThread] client: Received a response from the server » (NO ERROR) Successfully added a new measurement to the station with the name 'Another Test Station in Gaimersheim IDK'.
+2024-09-18T23:28:09Z [INFO] [MainThread] client: Received a CLOSE-CONNECTION-response from the server.
+2024-09-18T23:28:09Z [INFO] [MainThread] weather_station_client: Closed after 0.23625683784484863 seconds.

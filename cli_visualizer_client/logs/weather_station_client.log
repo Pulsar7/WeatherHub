@@ -1,0 +1,33 @@
+2024-09-24T12:36:14Z [INFO] [MainThread] logging_config: Logging is set up and using ISO 8601 format with UTC time.
+2024-09-24T12:36:14Z [INFO] [MainThread] weather_station_client: Started at 1727181374.0152202
+2024-09-24T12:36:14Z [INFO] [MainThread] client: Client is running.
+2024-09-24T12:36:14Z [INFO] [MainThread] client: Establishing connection to server ('localhost', 1338)
+2024-09-24T12:36:14Z [ERROR] [MainThread] client: Couldn't connect to the server: [Errno 111] Connection refused
+2024-09-24T12:36:14Z [ERROR] [MainThread] client: Couldn't establish a connection to the server.
+2024-09-24T12:36:14Z [INFO] [MainThread] weather_station_client: Closed after 0.0035190582275390625 seconds.
+2024-09-24T12:36:41Z [INFO] [MainThread] logging_config: Logging is set up and using ISO 8601 format with UTC time.
+2024-09-24T12:36:41Z [INFO] [MainThread] weather_station_client: Started at 1727181401.073457
+2024-09-24T12:36:41Z [INFO] [MainThread] client: Client is running.
+2024-09-24T12:36:41Z [INFO] [MainThread] client: Establishing connection to server ('localhost', 1337)
+2024-09-24T12:36:41Z [INFO] [MainThread] client: SSL established. Peer: {'subject': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'issuer': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'version': 1, 'serialNumber': '4BED22886654271F9A9CD5B410041B5EA3229BCD', 'notBefore': 'Sep 13 10:39:04 2024 GMT', 'notAfter': 'Sep 13 10:39:04 2025 GMT'}
+2024-09-24T12:36:41Z [INFO] [MainThread] client: Current & default connection configuration: buffer_size=1024 | max_msg_chunk_size=1024
+2024-09-24T12:36:41Z [INFO] [MainThread] client: Receiving connection-configuration-string from server
+2024-09-24T12:36:41Z [INFO] [MainThread] client: Updated connection-configurations.
+2024-09-24T12:36:41Z [INFO] [MainThread] client: «Connection-Configuration» Buffer-Size=2048 | Max-Msg-Chunk-Size=1024
+2024-09-24T12:36:41Z [ERROR] [MainThread] client: Received an ResponseCode-Error from the server: ResponseCode.INVALID_CREDENTIALS_ERROR
+2024-09-24T12:36:41Z [ERROR] [MainThread] client: Cannot proceed without being authenticated.
+2024-09-24T12:36:41Z [INFO] [MainThread] client: Received a CLOSE-CONNECTION-response from the server.
+2024-09-24T12:36:41Z [INFO] [MainThread] weather_station_client: Closed after 0.04942941665649414 seconds.
+2024-09-24T12:38:14Z [INFO] [MainThread] logging_config: Logging is set up and using ISO 8601 format with UTC time.
+2024-09-24T12:38:14Z [INFO] [MainThread] weather_station_client: Started at 1727181494.6533813
+2024-09-24T12:38:14Z [INFO] [MainThread] client: Client is running.
+2024-09-24T12:38:14Z [INFO] [MainThread] client: Establishing connection to server ('localhost', 1337)
+2024-09-24T12:38:14Z [INFO] [MainThread] client: SSL established. Peer: {'subject': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'issuer': ((('countryName', 'DE'),), (('stateOrProvinceName', 'BIELEFELD'),), (('localityName', 'BIELEFELD'),), (('organizationName', 'BIELEFELD GmbH'),), (('commonName', 'localhost'),)), 'version': 1, 'serialNumber': '4BED22886654271F9A9CD5B410041B5EA3229BCD', 'notBefore': 'Sep 13 10:39:04 2024 GMT', 'notAfter': 'Sep 13 10:39:04 2025 GMT'}
+2024-09-24T12:38:14Z [INFO] [MainThread] client: Current & default connection configuration: buffer_size=1024 | max_msg_chunk_size=1024
+2024-09-24T12:38:14Z [INFO] [MainThread] client: Receiving connection-configuration-string from server
+2024-09-24T12:38:14Z [INFO] [MainThread] client: Updated connection-configurations.
+2024-09-24T12:38:14Z [INFO] [MainThread] client: «Connection-Configuration» Buffer-Size=2048 | Max-Msg-Chunk-Size=1024
+2024-09-24T12:38:14Z [ERROR] [MainThread] client: Received an ResponseCode-Error from the server: INVALID CREDENTIALS ERROR
+2024-09-24T12:38:14Z [ERROR] [MainThread] client: Cannot proceed without being authenticated.
+2024-09-24T12:38:14Z [INFO] [MainThread] client: Received a CLOSE-CONNECTION-response from the server.
+2024-09-24T12:38:14Z [INFO] [MainThread] weather_station_client: Closed after 0.050913333892822266 seconds.

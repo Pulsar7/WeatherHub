@@ -99,6 +99,14 @@ To execute the script, it can be done like that:
 python3 weather_station_client.py
 ```
 
+## CLI-Visualizer-Client
+
+This client fetches data from the server-database and visualizes it with `matplotlib`.
+
+## Web-Visualizer-Client
+
+This client fetches data from the server-database and visualizes on a Web-UI.
+
 ## Key- & Certfile generation
 
 In order to work, both, the client and the server need a self-signed certificate and a keyfile to establish a TLS-encrypted connection.

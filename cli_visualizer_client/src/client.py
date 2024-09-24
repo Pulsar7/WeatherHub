@@ -13,7 +13,7 @@ from .custom_exceptions import *
 
 class Client:
 
-    """TCP/SSL_TLS - Weather-Station-Client for the WeatherHub-server."""
+    """TCP/SSL_TLS - CLI-Viszualizer-Client for the WeatherHub-server."""
 
     def __init__(self, config:dict) -> None:
         self._config:dict = config
@@ -279,32 +279,7 @@ class Client:
             if self.pwd_authentication_process():
                 if self.get_client_commands():
                     # Check if the client-user is allowed to send measurements to the server.
-                    if '!#SendWeatherReportByStationName#!' in list(self._client_commands.keys()):
-                        # Get weather-station-data
-                        status, data = self.get_measurement_data()
-                        if status:
-                            logging.info("Got the measurement data from the sensors.")
-                            # Sending measurement-report to server.
-                            command_str:str = "!#SendWeatherReportByStationName#!"
-                            params:tuple = self._client_commands[command_str]['params']
-                            keys:list = list(data.keys())
-                            response_for_server:str = command_str+params[0][0]+self._config['weather_station_name']+params[0][1]
-                            for i in range(1, len(params)):
-                                response_for_server += params[i][0]+data[keys[i-1]]+params[i][1]
-
-                            logging.info(f"Prepared the response-for-server-string: `{response_for_server}` ({len(response_for_server)} Bytes)")
-                            if self.send_msg(msg=response_for_server):
-                                status, (resp_msg, resp_code) = self.recv_msg()
-                                if status:
-                                    logging.info(f"Received a response from the server » ({resp_code.value.description}) {resp_msg}")
-                                else:
-                                    logging.error("Couldn't receive a response from the server.")
-                            else:
-                                logging.error("Couldn't send server the measurement-report.")
-                        else:
-                            logging.error("Couldn't fetch measurement-data from the sensors.")
-                    else:
-                        logging.error("This client seems to be misconfigured, because given user isn't allowed to send measurements.")
+                    
                 else:
                     logging.error("Couldn't get Client-Commands.")
             else:
